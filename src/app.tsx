@@ -1,7 +1,8 @@
-import * as ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 function render() {
-    ReactDOM.render(<h2>Hello Orange TODO</h2>, document.body);
+    const root = createRoot(document.getElementById('root'));
+    root.render(<h2>Hello Orange TODO</h2>)
 }
 
 render();
