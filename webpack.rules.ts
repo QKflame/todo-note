@@ -1,4 +1,4 @@
-import type { ModuleOptions } from 'webpack';
+import type {ModuleOptions} from 'webpack';
 
 export const rules: Required<ModuleOptions>['rules'] = [
   // Add support for native node modules
@@ -10,7 +10,7 @@ export const rules: Required<ModuleOptions>['rules'] = [
   },
   {
     test: /[/\\]node_modules[/\\].+\.(m?js|node)$/,
-    parser: { amd: false },
+    parser: {amd: false},
     use: {
       loader: '@vercel/webpack-asset-relocator-loader',
       options: {

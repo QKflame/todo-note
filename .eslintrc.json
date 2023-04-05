@@ -15,6 +15,16 @@
   ],
   "parser": "@typescript-eslint/parser",
   "rules": {
-    "semi":"error"
+    "semi":"error",
+    "object-curly-spacing":"error",
+    "indent": ["error", 2],
+    "eol-last": "error",
+    "no-else-return": "error",
+    "no-implicit-globals": "error",
+    "no-return-await": "error",
+    "no-useless-return": "error",
+    "default-case": "error",
+    "eqeqeq": "error",
+    "jsx-quotes":"error"
   }
 }
