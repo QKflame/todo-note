@@ -23,6 +23,7 @@
     "@electron-forge/plugin-webpack": "^6.0.5",
     "@types/react": "^18.0.30",
     "@types/react-dom": "^18.0.11",
+    "@types/react-redux": "^7.1.25",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
