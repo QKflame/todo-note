@@ -6,18 +6,23 @@ import path from 'path';
 
 rules.push({
   test: /\.css$/,
-  use: [{loader: 'style-loader'}, {loader: 'css-loader'}],
+  use: [{loader: 'style-loader'}, {loader: 'css-loader'}]
+});
+
+rules.push({
+  test: /\.less$/i,
+  use: ['style-loader', 'css-loader', 'less-loader']
 });
 
 export const rendererConfig: Configuration = {
   module: {
-    rules,
+    rules
   },
   plugins,
   resolve: {
     alias: {
-      'src': path.join(__dirname, 'src')
+      src: path.join(__dirname, 'src')
     },
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
-  },
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css']
+  }
 };
