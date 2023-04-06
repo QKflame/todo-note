@@ -23,4 +23,5 @@ npm run start
 
 - [ ] 增加 lodash 工具库
 - [ ] 增加 antd 组件库
-- [ ] 增加国际化支持
+- [ ] 增加国际化支持 https://juejin.cn/post/6844904015654813703
+- [ ] 自动指定项目所需要的 node 版本

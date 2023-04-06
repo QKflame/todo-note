@@ -1,9 +1,11 @@
 import {configureStore} from '@reduxjs/toolkit';
-import todosReducer from './todos';
+import todos from './todos';
+import i18n from './i18n';
 
 export const store = configureStore({
   reducer: {
-    todos: todosReducer
+    todos,
+    i18n
   }
 });
 

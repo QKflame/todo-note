@@ -1,20 +1,26 @@
 import {memo} from 'react';
-import {todoAdded} from '../store/todos';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
+import {FormattedMessage, IntlProvider} from 'react-intl';
+import {translationsForLocale} from 'src/locales';
+import {setLocale} from 'src/store/i18n';
+import {LocaleType} from 'src/types/i18n';
 
-const App = memo((props) => {
-  const todos = useAppSelector(state => state.todos);
+const App = memo(() => {
+  const locale = useAppSelector((state) => state.i18n.locale);
   const dispatch = useAppDispatch();
-  console.log('props', props);
-  console.log('todos', todos);
 
-  return <div onClick={() => {
-    dispatch(todoAdded({
-      id: '1',
-      text: '456',
-      completed: false
-    }));
-  }}>123</div>;
+  return (
+    <IntlProvider locale={locale} messages={translationsForLocale[locale]}>
+      <button
+        onClick={() => {
+          dispatch(setLocale(LocaleType.English));
+        }}
+      >
+        点击
+      </button>
+      <FormattedMessage id="name"></FormattedMessage>
+    </IntlProvider>
+  );
 });
 
 export default App;
