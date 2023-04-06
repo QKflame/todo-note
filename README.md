@@ -28,3 +28,4 @@ npm run start
 - [ ] 自动指定项目所需要的 node 版本
 - [ ] 增加 react-router 的使用
 - [ ] 连接 sql or nosql 数据库
+- [ ] 安装富文本编辑器 draft.js
