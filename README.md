@@ -26,3 +26,5 @@ npm run start
 - [ ] 增加 antd 组件库
 - [x] 增加国际化支持 https://juejin.cn/post/6844904015654813703
 - [ ] 自动指定项目所需要的 node 版本
+- [ ] 增加 react-router 的使用
+- [ ] 连接 sql or nosql 数据库
