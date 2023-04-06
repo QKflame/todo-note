@@ -4,6 +4,7 @@ import {FormattedMessage, IntlProvider} from 'react-intl';
 import {translationsForLocale} from 'src/locales';
 import {setLocale} from 'src/store/i18n';
 import {LocaleType} from 'src/types/i18n';
+import {Button} from 'antd';
 
 const App = memo(() => {
   const locale = useAppSelector((state) => state.i18n.locale);
@@ -11,13 +12,7 @@ const App = memo(() => {
 
   return (
     <IntlProvider locale={locale} messages={translationsForLocale[locale]}>
-      <button
-        onClick={() => {
-          dispatch(setLocale(LocaleType.English));
-        }}
-      >
-        点击
-      </button>
+      <Button>点击</Button>
       <FormattedMessage id="name"></FormattedMessage>
     </IntlProvider>
   );
