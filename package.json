@@ -1,6 +1,6 @@
 {
-  "name": "orange-todo",
-  "productName": "orange-todo",
+  "name": "todo-note",
+  "productName": "todo-note",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
