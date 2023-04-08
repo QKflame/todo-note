@@ -1,6 +1,7 @@
-import {Avatar, Menu, MenuProps} from 'antd';
 import './header.less';
+
 import {CheckSquareOutlined, UserOutlined} from '@ant-design/icons';
+import {Avatar, Menu, MenuProps} from 'antd';
 import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAppSelector} from 'src/hooks/store';
@@ -17,6 +18,9 @@ const menuItems: MenuProps['items'] = [
 const Header = () => {
   const navigate = useNavigate();
   const headerHeight = useAppSelector((state) => state.style.headerHeight);
+  const headerMarginBottom = useAppSelector(
+    (state) => state.style.headerMarginBottom
+  );
 
   const onClickMenu = useCallback((e: { key: string }) => {
     navigate(e.key);
@@ -24,6 +28,7 @@ const Header = () => {
 
   const Wrapper = styled.div`
     height: ${headerHeight};
+    margin-bottom: ${headerMarginBottom};
   `;
 
   return (

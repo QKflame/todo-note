@@ -1,7 +1,8 @@
 import {configureStore} from '@reduxjs/toolkit';
-import todos from './todos';
+
 import i18n from './i18n';
 import style from './style';
+import todos from './todos';
 
 export const store = configureStore({
   reducer: {

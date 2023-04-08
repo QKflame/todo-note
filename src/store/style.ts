@@ -1,7 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
-  headerHeight: '60px'
+  headerHeight: '60px',
+  headerMarginBottom: '6px'
 };
 
 const styleSlice = createSlice({

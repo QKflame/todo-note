@@ -13,6 +13,7 @@
     "plugin:import/typescript",
     "prettier"
   ],
+  "plugins": ["simple-import-sort"],
   "parser": "@typescript-eslint/parser",
   "rules": {
     "semi": "error",
@@ -27,6 +28,8 @@
     "eqeqeq": "error",
     "jsx-quotes": "error",
     "no-duplicate-imports": "error",
-    "import/no-unresolved": [2, {"ignore": ["src"]}]
+    "import/no-unresolved": [2, { "ignore": ["src"] }],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
   }
 }

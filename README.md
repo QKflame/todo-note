@@ -30,5 +30,6 @@ npm run start
 - [ ] 连接 sql or nosql 数据库 https://www.mongodb.com/docs/realm/sdk/node/integrations/electron/
 - [ ] 安装富文本编辑器 draft.js
 - [x] 添加 css-in-js styled-components
+- [x] import 自动排序
 
 - [ ] 完成待办界面的开发，可进行计划的管理
