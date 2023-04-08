@@ -3,6 +3,8 @@ import './header.less';
 import {CheckSquareOutlined, UserOutlined} from '@ant-design/icons';
 import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {useAppSelector} from 'src/hooks/store';
+import styled from 'styled-components';
 
 const menuItems: MenuProps['items'] = [
   {
@@ -14,13 +16,18 @@ const menuItems: MenuProps['items'] = [
 
 const Header = () => {
   const navigate = useNavigate();
+  const headerHeight = useAppSelector((state) => state.style.headerHeight);
 
   const onClickMenu = useCallback((e: { key: string }) => {
     navigate(e.key);
   }, []);
 
+  const Wrapper = styled.div`
+    height: ${headerHeight};
+  `;
+
   return (
-    <div className="app-header">
+    <Wrapper className="app-header">
       <div>
         <Menu mode="horizontal" items={menuItems} onClick={onClickMenu}></Menu>
       </div>
@@ -32,7 +39,7 @@ const Header = () => {
           icon={<UserOutlined />}
         />
       </div>
-    </div>
+    </Wrapper>
   );
 };
 

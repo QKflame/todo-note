@@ -23,9 +23,12 @@ npm run start
 - [x] 设置 src 别名
 
 - [x] 增加 lodash 工具库
-- [ ] 增加 antd 组件库
+- [x] 增加 antd 组件库
 - [x] 增加国际化支持 https://juejin.cn/post/6844904015654813703
 - [ ] 自动指定项目所需要的 node 版本
-- [ ] 增加 react-router 的使用
-- [ ] 连接 sql or nosql 数据库
+- [x] 增加 react-router 的使用
+- [ ] 连接 sql or nosql 数据库 https://www.mongodb.com/docs/realm/sdk/node/integrations/electron/
 - [ ] 安装富文本编辑器 draft.js
+- [x] 添加 css-in-js styled-components
+
+- [ ] 完成待办界面的开发，可进行计划的管理
