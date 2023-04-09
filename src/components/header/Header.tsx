@@ -1,6 +1,6 @@
 import './header.less';
 
-import {CheckSquareOutlined, UserOutlined} from '@ant-design/icons';
+import {UserOutlined} from '@ant-design/icons';
 import {Avatar, Menu, MenuProps} from 'antd';
 import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -10,8 +10,7 @@ import styled from 'styled-components';
 const menuItems: MenuProps['items'] = [
   {
     label: '我的待办',
-    key: 'todo',
-    icon: <CheckSquareOutlined />
+    key: 'todo'
   }
 ];
 

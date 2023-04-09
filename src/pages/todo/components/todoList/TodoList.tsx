@@ -1,8 +1,8 @@
 import './todoList.less';
 
-import {Button, Table} from 'antd';
+import {Button, ConfigProvider, Slider, Table} from 'antd';
 import type {ColumnsType} from 'antd/es/table';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import styled from 'styled-components';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
@@ -13,21 +13,6 @@ interface DataType {
   age: number;
   address: string;
 }
-
-const columns: ColumnsType<DataType> = [
-  {
-    title: 'Name',
-    dataIndex: 'name'
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age'
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address'
-  }
-];
 
 const data: DataType[] = [];
 for (let i = 0; i < 46; i++) {
@@ -66,13 +51,69 @@ const TodoList = () => {
 
   const Wrapper = styled.div``;
 
-  const onClickRow = useCallback((row: any) => {
+  const onClickTitle = useCallback((row: any) => {
     setTodoDrawerOpen(true);
   }, []);
 
   const onTodoDrawerClose = useCallback(() => {
     setTodoDrawerOpen(false);
   }, []);
+
+  const onClickPriority = useCallback(() => {
+    console.log('点击优先级');
+  }, []);
+
+  const columns: ColumnsType<DataType> = useMemo(
+    () => [
+      {
+        title: '事项',
+        dataIndex: 'name',
+        filters: [],
+        filterMode: 'tree',
+        filterSearch: true,
+        onFilter: (value: string, record) => record.name.startsWith(value),
+        width: '30%',
+        render: () => <span onClick={onClickTitle}>标题</span>
+      },
+      {
+        title: '优先级',
+        dataIndex: 'age',
+        width: '100px',
+        render: () => <span onClick={onClickPriority}>优先级</span>
+      },
+      {
+        title: '进度',
+        dataIndex: 'address',
+        width: '200px',
+        render: () => (
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: 'red'
+              }
+            }}
+          >
+            <Slider defaultValue={30} />
+          </ConfigProvider>
+        )
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'age',
+        width: '180px',
+        align: 'center',
+        render: () => <span onClick={onClickPriority}>2023-04-08 19:55</span>
+      },
+      {
+        title: '修改时间',
+        dataIndex: 'age',
+        width: '180px',
+        align: 'center',
+        render: () => <span onClick={onClickPriority}>2023-04-08 19:55</span>
+      }
+    ],
+    []
+  );
 
   return (
     <Wrapper className="todo-list">
@@ -82,11 +123,6 @@ const TodoList = () => {
         dataSource={data}
         size="middle"
         rowClassName="todo-item-row"
-        onRow={(row) => {
-          return {
-            onClick: () => onClickRow(row)
-          };
-        }}
       />
 
       <TodoDrawer
