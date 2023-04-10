@@ -2,7 +2,7 @@ import './todoList.less';
 
 import {Button, ConfigProvider, Slider, Table} from 'antd';
 import type {ColumnsType} from 'antd/es/table';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import styled from 'styled-components';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
@@ -115,8 +115,26 @@ const TodoList = () => {
     []
   );
 
+  const onClickBtn = useCallback(() => {
+    console.log('点击按钮');
+    window.api.createTodo().then((res) => {
+      console.log('res', res);
+    });
+  }, []);
+
+  useEffect(() => {
+    window.api.getTodoList().then((res: any) => {
+      console.log('res', res);
+    });
+  }, []);
+
   return (
     <Wrapper className="todo-list">
+      <div className="action-bar-wrapper">
+        <Button type="primary" onClick={onClickBtn}>
+          Primary
+        </Button>
+      </div>
       <Table
         rowSelection={rowSelection}
         columns={columns}

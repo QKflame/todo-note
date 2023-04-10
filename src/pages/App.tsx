@@ -1,4 +1,4 @@
-import {memo} from 'react';
+import {memo, useEffect} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Route, Routes} from 'react-router-dom';
 import Header from 'src/components/header/Header';
@@ -18,6 +18,10 @@ const App = memo(() => {
   const PageWrapper = styled.div`
     height: calc(100vh - ${headerHeight} - ${headerMarginBottom});
   `;
+
+  useEffect(() => {
+    console.log('window', window);
+  }, []);
 
   return (
     <IntlProvider locale={locale} messages={translationsForLocale[locale]}>
