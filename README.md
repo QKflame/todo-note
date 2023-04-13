@@ -27,9 +27,10 @@ npm run start
 - [x] 增加国际化支持 https://juejin.cn/post/6844904015654813703
 - [ ] 自动指定项目所需要的 node 版本
 - [x] 增加 react-router 的使用
-- [ ] 连接 sql or nosql 数据库 https://www.mongodb.com/docs/realm/ https://www.mongodb.com/docs/realm/sdk/node/integrations/electron/
+- [ ] 连接 sql or nosql 数据库 选择 sqlite3
 - [ ] 安装富文本编辑器 draft.js
 - [x] 添加 css-in-js styled-components
 - [x] import 自动排序
 
 - [ ] 完成待办界面的开发，可进行计划的管理
+- [ ] appStore 发布 https://www.electronjs.org/zh/docs/latest/tutorial/mac-app-store-submission-guide
