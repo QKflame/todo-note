@@ -34,3 +34,38 @@ npm run start
 
 - [ ] 完成待办界面的开发，可进行计划的管理
 - [ ] appStore 发布 https://www.electronjs.org/zh/docs/latest/tutorial/mac-app-store-submission-guide
+
+
+
+
+
+# 集成数据库
+
+选择 sqlite 还是 realm ?
+
+
+
+npm 包使用 sqlite3 还是 better-sqlite
+
+
+
+如何在 electron 中使用 sqlite
+
+
+
+sqlite 官网：https://sqlite.org/index.html
+
+相关的学习文章：
+
+- https://fmacedoo.medium.com/standalone-application-with-electron-react-and-sqlite-stack-9536a8b5a7b9
+
+
+
+Better-sqlite npm 包文档：
+
+- https://www.npmjs.com/package/better-sqlite3
+
+
+
+
+
