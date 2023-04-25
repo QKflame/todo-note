@@ -31,27 +31,18 @@ npm run start
 - [ ] 安装富文本编辑器 draft.js
 - [x] 添加 css-in-js styled-components
 - [x] import 自动排序
+- [] mui https://mui.com/material-ui/react-slider/
 
 - [ ] 完成待办界面的开发，可进行计划的管理
 - [ ] appStore 发布 https://www.electronjs.org/zh/docs/latest/tutorial/mac-app-store-submission-guide
-
-
-
-
 
 # 集成数据库
 
 选择 sqlite 还是 realm ?
 
-
-
 npm 包使用 sqlite3 还是 better-sqlite
 
-
-
 如何在 electron 中使用 sqlite
-
-
 
 sqlite 官网：https://sqlite.org/index.html
 
@@ -59,13 +50,6 @@ sqlite 官网：https://sqlite.org/index.html
 
 - https://fmacedoo.medium.com/standalone-application-with-electron-react-and-sqlite-stack-9536a8b5a7b9
 
-
-
 Better-sqlite npm 包文档：
 
 - https://www.npmjs.com/package/better-sqlite3
-
-
-
-
-

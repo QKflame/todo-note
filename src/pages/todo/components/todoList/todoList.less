@@ -15,6 +15,19 @@
   }
 
   .action-bar-wrapper {
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .left-actions-wrapper,
+    .right-actions-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .create-todo-input {
+      height: 36px;
+      line-height: 36px;
+    }
   }
 }
