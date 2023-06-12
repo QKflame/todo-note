@@ -19,10 +19,6 @@ const App = memo(() => {
     height: calc(100vh - ${headerHeight} - ${headerMarginBottom});
   `;
 
-  useEffect(() => {
-    console.log('window', window);
-  }, []);
-
   return (
     <IntlProvider locale={locale} messages={translationsForLocale[locale]}>
       <Header></Header>

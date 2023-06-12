@@ -1,48 +1,26 @@
 import './todoList.less';
 
-import {PlusOutlined} from '@ant-design/icons';
-import Slider, {
-  SliderThumb,
-  SliderValueLabelProps
-} from '@mui/material/Slider';
+import Slider from '@mui/material/Slider';
 import {styled as _styled} from '@mui/material/styles';
-import {
-  Button,
-  Checkbox,
-  ConfigProvider,
-  Dropdown,
-  Input,
-  Select,
-  Table,
-  Tag
-} from 'antd';
+import {useRequest} from 'ahooks';
+import {Button, Checkbox, Input, message, Select, Table} from 'antd';
 import type {ColumnsType} from 'antd/es/table';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
+import {useAppDispatch, useAppSelector} from 'src/hooks/store';
+import {
+  toggleOnlyShowHighPriorityChecked,
+  toggleOnlyShowUnfinishedChecked
+} from 'src/store/todos';
+import {TodoItem} from 'src/types';
 import styled from 'styled-components';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
-
-interface DataType {
-  key: React.Key;
-  name: string;
-  age: number;
-  address: string;
-  priority: number;
-  progress: number;
-}
-
-const data: DataType[] = [];
-for (let i = 0; i < 46; i++) {
-  data.push({
-    key: i,
-    name: `Edward King ${i}`,
-    age: 32,
-    priority: Math.floor(Math.random() * 2) + 1,
-    progress: Math.floor(Math.random() * 100) + 1,
-    // progress: 100,
-    address: `London, Park Lane no. ${i}`
-  });
-}
 
 const StyledSlider = _styled(Slider)({
   height: 3,
@@ -104,17 +82,17 @@ const GreenSlider = _styled(StyledSlider)({
 
 const TodoList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [loading, setLoading] = useState(false);
   const [todoDrawerOpen, setTodoDrawerOpen] = useState(false);
+  const [datasource, setDatasource] = useState<Array<TodoItem>>([]);
 
-  const start = () => {
-    setLoading(true);
-    // ajax request after empty completing
-    setTimeout(() => {
-      setSelectedRowKeys([]);
-      setLoading(false);
-    }, 1000);
-  };
+  const onlyShowUnfinishedChecked = useAppSelector(
+    (state) => state.todos.onlyShowUnfinishedChecked
+  );
+  const onlyShowHighPriorityChecked = useAppSelector(
+    (state) => state.todos.onlyShowHighPriorityChecked
+  );
+
+  const dispatch = useAppDispatch();
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     console.log('selectedRowKeys changed: ', newSelectedRowKeys);
@@ -141,7 +119,20 @@ const TodoList = () => {
     console.log('点击优先级');
   }, []);
 
-  const columns: ColumnsType<DataType> = useMemo(
+  const {run: getTodoLists} = useRequest(window.api.getTodoList, {
+    manual: true,
+    onSuccess: (res: any) => {
+      if (res?.result) {
+        setDatasource(res.result);
+      }
+    }
+  });
+
+  useEffect(() => {
+    getTodoLists();
+  }, []);
+
+  const columns: ColumnsType<TodoItem> = useMemo(
     () => [
       {
         title: '事项',
@@ -151,7 +142,11 @@ const TodoList = () => {
         filterSearch: true,
         onFilter: (value: string, record) => record.name.startsWith(value),
         width: '30%',
-        render: () => <span onClick={onClickTitle}>标题</span>
+        render: (value) => (
+          <span onClick={onClickTitle} style={{color: '#448EF7'}}>
+            {value}
+          </span>
+        )
       },
       {
         title: '优先级',
@@ -222,16 +217,46 @@ const TodoList = () => {
   );
 
   const onClickBtn = useCallback(() => {
-    console.log('点击按钮');
     window.api.createTodo().then((res) => {
       console.log('res', res);
     });
   }, []);
 
-  useEffect(() => {
-    window.api.getTodoList().then((res: any) => {
-      console.log('res', res);
-    });
+  const onCreateTodo = useCallback((e) => {
+    window.api
+      .createTodo({
+        name: e.target.value
+      })
+      .then((res) => {
+        if (res.changes) {
+          message.success('创建成功');
+          getTodoLists();
+        }
+      });
+    e.target.value = '';
+  }, []);
+
+  const filteredDatasource = useMemo(() => {
+    let arr = datasource;
+    if (onlyShowUnfinishedChecked) {
+      arr = arr.filter((item) => {
+        return item.progress !== 100;
+      });
+    }
+    if (onlyShowHighPriorityChecked) {
+      arr = arr.filter((item) => {
+        return item.priority === 0;
+      });
+    }
+    return arr;
+  }, [datasource, onlyShowUnfinishedChecked, onlyShowHighPriorityChecked]);
+
+  const onOnlyShowUnfinishedCheckboxChange = useCallback(() => {
+    dispatch(toggleOnlyShowUnfinishedChecked());
+  }, []);
+
+  const onOnlyShowHighPriorityCheckboxChange = useCallback(() => {
+    dispatch(toggleOnlyShowHighPriorityChecked());
   }, []);
 
   return (
@@ -242,11 +267,22 @@ const TodoList = () => {
             size="middle"
             placeholder="+ 输入待办任务，点击回车即可创建"
             className="w-400 create-todo-input"
+            onPressEnter={onCreateTodo}
           />
         </div>
         <div className="right-actions-wrapper">
-          <Checkbox>只显示未完成</Checkbox>
-          <Checkbox>只显示高优先级</Checkbox>
+          <Checkbox
+            checked={onlyShowUnfinishedChecked}
+            onChange={onOnlyShowUnfinishedCheckboxChange}
+          >
+            只显示未完成
+          </Checkbox>
+          <Checkbox
+            checked={onlyShowHighPriorityChecked}
+            onChange={onOnlyShowHighPriorityCheckboxChange}
+          >
+            只显示高优先级
+          </Checkbox>
           <Button type="primary" onClick={onClickBtn} className="ml-10">
             批量设置
           </Button>
@@ -258,8 +294,10 @@ const TodoList = () => {
       <Table
         rowSelection={rowSelection}
         columns={columns}
-        dataSource={data}
+        rowKey="id"
+        dataSource={filteredDatasource}
         size="middle"
+        pagination={false}
         rowClassName="todo-item-row"
       />
 

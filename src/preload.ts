@@ -4,6 +4,6 @@
 import {contextBridge, ipcRenderer} from 'electron';
 
 contextBridge.exposeInMainWorld('api', {
-  createTodo: () => ipcRenderer.invoke('api:createTodo'),
-  getTodoList: () => ipcRenderer.invoke('api:getTodoList')
+  getTodoList: (...args) => ipcRenderer.invoke('api:getTodoList', ...args),
+  createTodo: (...args) => ipcRenderer.invoke('api:createTodo', ...args)
 });

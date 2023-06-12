@@ -1,22 +1,23 @@
-import {createSlice} from "@reduxjs/toolkit";
+import {createSlice} from '@reduxjs/toolkit';
 
 const todosSlice = createSlice({
   name: 'todos',
-  initialState: [],
+  initialState: {
+    onlyShowUnfinishedChecked: false,
+    onlyShowHighPriorityChecked: false
+  },
   reducers: {
-    todoAdded(state, action) {
-      state.push({
-        id: action.payload.id,
-        text: action.payload.text,
-        completed: false
-      });
+    toggleOnlyShowUnfinishedChecked(state) {
+      state.onlyShowUnfinishedChecked = !state.onlyShowUnfinishedChecked;
     },
-    todoToggle(state, action) {
-      const todo = state.find(todo => todo.id === action.payload);
-      todo.completed = !todo.completed;
+    toggleOnlyShowHighPriorityChecked(state) {
+      state.onlyShowHighPriorityChecked = !state.onlyShowHighPriorityChecked;
     }
   }
 });
 
-export const {todoAdded, todoToggle} = todosSlice.actions;
+export const {
+  toggleOnlyShowUnfinishedChecked,
+  toggleOnlyShowHighPriorityChecked
+} = todosSlice.actions;
 export default todosSlice.reducer;
