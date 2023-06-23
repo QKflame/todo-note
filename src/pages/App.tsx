@@ -1,10 +1,9 @@
-import {memo, useEffect} from 'react';
+import {memo} from 'react';
 import {IntlProvider} from 'react-intl';
 import {Route, Routes} from 'react-router-dom';
 import Header from 'src/components/header/Header';
 import {useAppSelector} from 'src/hooks/store';
 import {translationsForLocale} from 'src/locales';
-import styled from 'styled-components';
 
 import Todo from './todo/Todo';
 
@@ -15,18 +14,19 @@ const App = memo(() => {
     (state) => state.style.headerMarginBottom
   );
 
-  const PageWrapper = styled.div`
-    height: calc(100vh - ${headerHeight} - ${headerMarginBottom});
-  `;
-
   return (
     <IntlProvider locale={locale} messages={translationsForLocale[locale]}>
       <Header></Header>
-      <PageWrapper className="app-page">
+      <div
+        className="app-page"
+        style={{
+          height: `calc(100vh - ${headerHeight} - ${headerMarginBottom})`
+        }}
+      >
         <Routes>
           <Route path="todo" element={<Todo />}></Route>
         </Routes>
-      </PageWrapper>
+      </div>
     </IntlProvider>
   );
 });

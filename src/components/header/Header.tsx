@@ -5,7 +5,6 @@ import {Avatar, Menu, MenuProps} from 'antd';
 import {useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAppSelector} from 'src/hooks/store';
-import styled from 'styled-components';
 
 const menuItems: MenuProps['items'] = [
   {
@@ -21,17 +20,18 @@ const Header = () => {
     (state) => state.style.headerMarginBottom
   );
 
-  const onClickMenu = useCallback((e: { key: string }) => {
-    navigate(e.key);
-  }, []);
-
-  const Wrapper = styled.div`
-    height: ${headerHeight};
-    margin-bottom: ${headerMarginBottom};
-  `;
+  const onClickMenu = useCallback(
+    (e: { key: string }) => {
+      navigate(e.key);
+    },
+    [navigate]
+  );
 
   return (
-    <Wrapper className="app-header">
+    <div
+      className="app-header"
+      style={{height: headerHeight, marginBottom: headerMarginBottom}}
+    >
       <div>
         <Menu mode="horizontal" items={menuItems} onClick={onClickMenu}></Menu>
       </div>
@@ -43,7 +43,7 @@ const Header = () => {
           icon={<UserOutlined />}
         />
       </div>
-    </Wrapper>
+    </div>
   );
 };
 

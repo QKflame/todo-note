@@ -1,125 +1,104 @@
 import './todoList.less';
 
-import Slider from '@mui/material/Slider';
-import {styled as _styled} from '@mui/material/styles';
-import {useRequest} from 'ahooks';
-import {Button, Checkbox, Input, message, Select, Table} from 'antd';
-import type {ColumnsType} from 'antd/es/table';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
-import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import {
+  AlertOutlined,
+  CheckCircleFilled,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CoffeeOutlined,
+  RocketOutlined
+} from '@ant-design/icons';
+import {useRequest} from 'ahooks';
+import {
+  Button,
+  Checkbox,
+  Input,
+  message,
+  Modal,
+  Popover,
+  Progress,
+  Segmented,
+  Slider,
+  Table,
+  Tag
+} from 'antd';
+import type {ColumnsType} from 'antd/es/table';
+import {cloneDeep, debounce, orderBy, throttle} from 'lodash';
+import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
+import {useAppDispatch, useAppSelector} from 'src/hooks/store';
+import {isTrashSelector} from 'src/store/plan';
+import {
+  resetTodoDetail,
+  setTodoDetail,
+  toggleIsTodoDrawerOpened,
   toggleOnlyShowHighPriorityChecked,
   toggleOnlyShowUnfinishedChecked
 } from 'src/store/todos';
 import {TodoItem} from 'src/types';
-import styled from 'styled-components';
+import {convertTimestampToDuration, formatTimestamp} from 'src/utils/util';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
 
-const StyledSlider = _styled(Slider)({
-  height: 3,
-  '& .MuiSlider-track': {
-    border: 'none'
-  },
-  '& .MuiSlider-thumb': {
-    height: 12,
-    width: 12,
-    backgroundColor: '#fff',
-    border: '2px solid currentColor',
-    '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
-      boxShadow: 'inherit'
-    },
-    '&:before': {
-      display: 'none'
-    }
-  },
-  '& .MuiSlider-valueLabel': {
-    lineHeight: 1.2,
-    fontSize: 12,
-    background: 'unset',
-    padding: 0,
-    width: 16,
-    height: 16,
-    borderRadius: '50% 50% 50% 0',
-    transformOrigin: 'bottom left',
-    transform: 'translate(50%, -100%) rotate(-45deg) scale(0)',
-    '&:before': {display: 'none'},
-    '&.MuiSlider-valueLabelOpen': {
-      transform: 'translate(50%, -100%) rotate(-45deg) scale(1)'
-    },
-    '& > *': {
-      transform: 'rotate(45deg)'
-    }
-  }
-});
-
-const RedSlider = _styled(StyledSlider)({
-  color: '#8c8c8c',
-  '& .MuiSlider-valueLabel': {
-    backgroundColor: '#8c8c8c'
-  }
-});
-
-const BlueSlider = _styled(StyledSlider)({
-  color: '#448EF7',
-  '& .MuiSlider-valueLabel': {
-    backgroundColor: '#448EF7'
-  }
-});
-
-const GreenSlider = _styled(StyledSlider)({
-  color: '#72C140',
-  '& .MuiSlider-valueLabel': {
-    backgroundColor: '#72C140'
-  }
-});
-
 const TodoList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [todoDrawerOpen, setTodoDrawerOpen] = useState(false);
   const [datasource, setDatasource] = useState<Array<TodoItem>>([]);
+  const [todoName, setTodoName] = useState('');
 
+  // 只显示未完成
   const onlyShowUnfinishedChecked = useAppSelector(
     (state) => state.todos.onlyShowUnfinishedChecked
   );
+
+  const isTrash = useAppSelector(isTrashSelector);
+
+  // 只显示高优先级
   const onlyShowHighPriorityChecked = useAppSelector(
     (state) => state.todos.onlyShowHighPriorityChecked
   );
 
+  // 控制抽屉是否显示
+  const isTodoDrawerOpened = useAppSelector(
+    (state) => state.todos.isTodoDrawerOpened
+  );
+
+  // 当前打开抽屉的 todo
+  const todoDetail = useAppSelector((state) => state.todos.todoDetail);
+
+  const currentPlanId = useAppSelector((state) => state.plan.currentPlanId);
+
   const dispatch = useAppDispatch();
 
+  // 监听选中
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-    setSelectedRowKeys(newSelectedRowKeys);
+    setSelectedRowKeys(cloneDeep(newSelectedRowKeys));
   };
 
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange
   };
-  const hasSelected = selectedRowKeys.length > 0;
 
-  const Wrapper = styled.div``;
-
-  const onClickTitle = useCallback((row: any) => {
-    setTodoDrawerOpen(true);
-  }, []);
+  // 监听点击 title
+  const onClickTitle = useCallback(
+    (row: any) => {
+      if (isTrash) {
+        return;
+      }
+      // 获取 todo 的详细信息
+      window.api.getTodoDetail({id: row.id}).then((res) => {
+        dispatch(setTodoDetail(res));
+        dispatch(toggleIsTodoDrawerOpened());
+      });
+    },
+    [dispatch, isTrash]
+  );
 
   const onTodoDrawerClose = useCallback(() => {
-    setTodoDrawerOpen(false);
-  }, []);
+    dispatch(toggleIsTodoDrawerOpened());
+    dispatch(resetTodoDetail());
+  }, [dispatch]);
 
-  const onClickPriority = useCallback(() => {
-    console.log('点击优先级');
-  }, []);
-
-  const {run: getTodoLists} = useRequest(window.api.getTodoList, {
+  const {run: queryTodoLists} = useRequest(window.api.getTodoList, {
     manual: true,
     onSuccess: (res: any) => {
       if (res?.result) {
@@ -128,113 +107,17 @@ const TodoList = () => {
     }
   });
 
+  const getTodoLists = useCallback(() => {
+    queryTodoLists({planId: currentPlanId});
+  }, [currentPlanId, queryTodoLists]);
+
   useEffect(() => {
     getTodoLists();
-  }, []);
+  }, [getTodoLists]);
 
-  const columns: ColumnsType<TodoItem> = useMemo(
-    () => [
-      {
-        title: '事项',
-        dataIndex: 'name',
-        filters: [],
-        filterMode: 'tree',
-        filterSearch: true,
-        onFilter: (value: string, record) => record.name.startsWith(value),
-        width: '30%',
-        render: (value) => (
-          <span onClick={onClickTitle} style={{color: '#448EF7'}}>
-            {value}
-          </span>
-        )
-      },
-      {
-        title: '优先级',
-        dataIndex: 'priority',
-        width: '60px',
-        render: (value: number) => {
-          let color = '#448EF7';
-          switch (value) {
-          case 0:
-            color = '#EC5B56';
-            break;
-          case 1:
-            color = '#EFB041';
-            break;
-          default:
-            break;
-          }
-          // return <Tag color={color}>{'P' + value}</Tag>;
-          return (
-            <Select
-              size="small"
-              defaultValue={value}
-              // onChange={handleChange}
-              options={[
-                {value: 0, label: '高'},
-                {value: 1, label: '中'},
-                {value: 2, label: '低'}
-              ]}
-            />
-          );
-        }
-      },
-      {
-        title: '进度',
-        dataIndex: 'progress',
-        width: '80px',
-        render: (value: number) => {
-          const props: any = {
-            defaultValue: value,
-            'ria-label': 'Default',
-            valueLabelDisplay: 'auto'
-          };
-          return value === 100 ? (
-            <GreenSlider {...props} />
-          ) : value > 50 ? (
-            <BlueSlider {...props} />
-          ) : (
-            <RedSlider {...props} />
-          );
-        }
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'age',
-        width: '60px',
-        align: 'center',
-        render: () => <span onClick={onClickPriority}>2小时前</span>
-      },
-      {
-        title: '修改时间',
-        dataIndex: 'age',
-        width: '60px',
-        align: 'center',
-        render: () => <span onClick={onClickPriority}>3天前</span>
-      }
-    ],
-    []
-  );
-
-  const onClickBtn = useCallback(() => {
-    window.api.createTodo().then((res) => {
-      console.log('res', res);
-    });
-  }, []);
-
-  const onCreateTodo = useCallback((e) => {
-    window.api
-      .createTodo({
-        name: e.target.value
-      })
-      .then((res) => {
-        if (res.changes) {
-          message.success('创建成功');
-          getTodoLists();
-        }
-      });
-    e.target.value = '';
-  }, []);
+  const onSaveSuccess = useCallback(() => {
+    getTodoLists();
+  }, [getTodoLists]);
 
   const filteredDatasource = useMemo(() => {
     let arr = datasource;
@@ -248,45 +131,463 @@ const TodoList = () => {
         return item.priority === 0;
       });
     }
-    return arr;
-  }, [datasource, onlyShowUnfinishedChecked, onlyShowHighPriorityChecked]);
+    return isTrash
+      ? orderBy(arr, ['deleteTime'], ['desc'])
+      : orderBy(arr, ['id'], ['desc']);
+  }, [
+    datasource,
+    onlyShowUnfinishedChecked,
+    onlyShowHighPriorityChecked,
+    isTrash
+  ]);
 
-  const onOnlyShowUnfinishedCheckboxChange = useCallback(() => {
-    dispatch(toggleOnlyShowUnfinishedChecked());
-  }, []);
+  // 监听优先级发生变化
+  const onPriorityChange = useCallback(
+    (id: number, value: number) => {
+      window.api.updateTodoPriority({id, priority: value}).then((res) => {
+        if (res.changes === 1) {
+          getTodoLists();
+        }
+      });
+    },
+    [getTodoLists]
+  );
 
-  const onOnlyShowHighPriorityCheckboxChange = useCallback(() => {
-    dispatch(toggleOnlyShowHighPriorityChecked());
+  // 监听进度发生变化
+  const onProgressChange = debounce((value: number, id: number) => {
+    window.api.updateTodoProgress({id, progress: value}).then((res) => {
+      if (res.changes === 1) {
+        getTodoLists();
+      }
+    });
+  }, 500);
+
+  const columns: ColumnsType<TodoItem> = useMemo(
+    () => [
+      {
+        title: '事项',
+        dataIndex: 'name',
+        filters: filteredDatasource.map((item) => {
+          return {
+            text: item.name,
+            value: item.id
+          };
+        }),
+        filterSearch: true,
+        onFilter: (value: number, record) => {
+          return record.id === value;
+        },
+        width: ' 160px',
+        textWrap: 'word-break',
+        ellipsis: true,
+        render: (value, item: TodoItem) => (
+          <span
+            onClick={() => onClickTitle(item)}
+            style={{
+              color: '#448EF7',
+              display: 'block',
+              width: '100%',
+              paddingRight: '60px',
+              whiteSpace: 'nowrap',
+              wordBreak: 'break-all',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              height: '32px',
+              lineHeight: '32px'
+            }}
+          >
+            {value}
+          </span>
+        )
+      },
+      {
+        title: '优先级',
+        dataIndex: 'priority',
+        width: '60px',
+        filters: [
+          {
+            text: '紧急',
+            value: 0
+          },
+          {
+            text: '重要',
+            value: 1
+          },
+          {
+            text: '一般',
+            value: 2
+          }
+        ],
+        filterSearch: true,
+        onFilter: (value: number, record) => {
+          return record.priority === value;
+        },
+        render: (value: number, item: TodoItem) => {
+          return isTrash ? (
+            <Tag
+              icon={
+                value === 0 ? (
+                  <AlertOutlined />
+                ) : value === 1 ? (
+                  <RocketOutlined />
+                ) : (
+                  <CoffeeOutlined />
+                )
+              }
+              color={
+                value === 0 ? 'error' : value === 1 ? 'warning' : 'default'
+              }
+            >
+              {value === 0 ? '紧急' : value === 1 ? '重要' : '一般'}
+            </Tag>
+          ) : (
+            <Popover
+              content={
+                <Segmented
+                  value={value}
+                  options={[
+                    {
+                      label: (
+                        <Tag icon={<CoffeeOutlined />} color="default">
+                          一般
+                        </Tag>
+                      ),
+                      value: 2
+                    },
+                    {
+                      label: (
+                        <Tag icon={<RocketOutlined />} color="warning">
+                          重要
+                        </Tag>
+                      ),
+                      value: 1
+                    },
+                    {
+                      label: (
+                        <Tag icon={<AlertOutlined />} color="error">
+                          紧急
+                        </Tag>
+                      ),
+                      value: 0
+                    }
+                  ]}
+                  onChange={(v: number) => {
+                    onPriorityChange(item.id, v);
+                  }}
+                />
+              }
+              title="设置优先级"
+              trigger="hover"
+            >
+              <Tag
+                icon={
+                  value === 0 ? (
+                    <AlertOutlined />
+                  ) : value === 1 ? (
+                    <RocketOutlined />
+                  ) : (
+                    <CoffeeOutlined />
+                  )
+                }
+                color={
+                  value === 0 ? 'error' : value === 1 ? 'warning' : 'default'
+                }
+              >
+                {value === 0 ? '紧急' : value === 1 ? '重要' : '一般'}
+              </Tag>
+            </Popover>
+          );
+        }
+      },
+      {
+        title: '进度',
+        dataIndex: 'progress',
+        width: '30px',
+        filters: [
+          {
+            text: '未开始',
+            value: 0
+          },
+          {
+            text: '进行中',
+            value: 1
+          },
+          {
+            text: '已完成',
+            value: 100
+          }
+        ],
+        filterSearch: true,
+        onFilter: (value: number, record) => {
+          if (value === 1) {
+            return record.progress > 0 && record.progress < 100;
+          }
+          return record.progress === value;
+        },
+        render: (value: number, item: TodoItem) => {
+          return isTrash ? (
+            <Progress
+              type="circle"
+              percent={value}
+              size={20}
+              showInfo={false}
+            />
+          ) : (
+            <Popover
+              content={
+                <Slider
+                  defaultValue={value}
+                  onChange={(v: number) => onProgressChange(v, item.id)}
+                />
+              }
+              title="设置进度"
+              trigger="hover"
+            >
+              <Progress
+                type="circle"
+                percent={value}
+                size={20}
+                showInfo={false}
+              />
+            </Popover>
+          );
+        }
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'createTime',
+        width: '60px',
+        render: (value) => {
+          return (
+            <Popover
+              content={formatTimestamp(value)}
+              title="创建时间"
+              trigger="hover"
+            >
+              <div style={{fontSize: 12, color: 'gray', display: 'inline'}}>
+                <ClockCircleOutlined />
+                <span style={{marginLeft: '6px'}}>
+                  {convertTimestampToDuration(value)}
+                </span>
+              </div>
+            </Popover>
+          );
+        }
+      },
+      ...(isTrash
+        ? []
+        : [
+          {
+            title: '修改时间',
+            dataIndex: 'updateTime',
+            width: '60px',
+            render: (value: number) => {
+              return (
+                <Popover
+                  content={formatTimestamp(value)}
+                  title="修改时间"
+                  trigger="hover"
+                >
+                  <div
+                    style={{fontSize: 12, color: 'gray', display: 'inline'}}
+                  >
+                    <ClockCircleOutlined />
+                    <span style={{marginLeft: '6px'}}>
+                      {convertTimestampToDuration(value)}
+                    </span>
+                  </div>
+                </Popover>
+              );
+            }
+          }
+        ]),
+      ...(!isTrash
+        ? []
+        : [
+          {
+            title: '删除时间',
+            dataIndex: 'deleteTime',
+            width: '60px',
+            render: (value: number) => {
+              return (
+                <Popover
+                  content={formatTimestamp(value)}
+                  title="删除时间"
+                  trigger="hover"
+                >
+                  <div
+                    style={{fontSize: 12, color: 'gray', display: 'inline'}}
+                  >
+                    <ClockCircleOutlined />
+                    <span style={{marginLeft: '6px'}}>
+                      {convertTimestampToDuration(value)}
+                    </span>
+                  </div>
+                </Popover>
+              );
+            }
+          }
+        ])
+    ],
+    [
+      filteredDatasource,
+      isTrash,
+      onClickTitle,
+      onPriorityChange,
+      onProgressChange
+    ]
+  );
+
+  // 点击批量完成按钮
+  const onClickBatchFinish = throttle(
+    () => {
+      if (!selectedRowKeys.length) {
+        message.warning('请选择待办事项');
+        return;
+      }
+      Modal.confirm({
+        title: '批量完成',
+        content: '是否批量完成已选择的待办事项？',
+        okText: '确认',
+        cancelText: '取消',
+        icon: <CheckCircleFilled style={{color: '#72C240'}} />,
+        onOk: () => {
+          window.api.batchFinishTodo({ids: selectedRowKeys}).then(() => {
+            message.success('操作成功');
+            setSelectedRowKeys([]);
+            getTodoLists();
+          });
+        }
+      });
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
+  );
+
+  // 点击批量删除按钮
+  const onClickBatchDelete = throttle(
+    () => {
+      if (!selectedRowKeys.length) {
+        message.warning('请选择待办事项');
+        return;
+      }
+      if (isTrash) {
+        Modal.confirm({
+          title: '批量删除',
+          content:
+            '是否批量删除已选择的待办事项？在废纸篓中进行删除后，无法恢复，请谨慎操作!',
+          okText: '确认',
+          cancelText: '取消',
+          onOk: () => {
+            window.api.batchDeleteTodo({ids: selectedRowKeys}).then(() => {
+              message.success('删除成功');
+              setSelectedRowKeys([]);
+              getTodoLists();
+            });
+          }
+        });
+        return;
+      }
+      Modal.confirm({
+        title: '批量删除',
+        content: '是否批量删除已选择的待办事项？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          window.api.batchDeleteTodo({ids: selectedRowKeys}).then(() => {
+            message.success('删除成功');
+            setSelectedRowKeys([]);
+            getTodoLists();
+          });
+        }
+      });
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
+  );
+
+  const onCreateTodo = useCallback(
+    (e) => {
+      window.api
+        .createTodo({
+          name: e.target.value,
+          planId: currentPlanId
+        })
+        .then((res) => {
+          if (res.changes) {
+            message.success('创建成功');
+            getTodoLists();
+            setTodoName('');
+          }
+        });
+      e.target.value = '';
+    },
+    [currentPlanId, getTodoLists]
+  );
+
+  useEffect(() => {
+    setSelectedRowKeys([]);
+  }, [currentPlanId]);
+
+  // const onOnlyShowUnfinishedCheckboxChange = useCallback(() => {
+  //   dispatch(toggleOnlyShowUnfinishedChecked());
+  // }, [dispatch]);
+
+  // const onOnlyShowHighPriorityCheckboxChange = useCallback(() => {
+  //   dispatch(toggleOnlyShowHighPriorityChecked());
+  // }, [dispatch]);
+
+  const onTodoNameChange = useCallback((e) => {
+    setTodoName(e.target.value);
   }, []);
 
   return (
-    <Wrapper className="todo-list">
+    <div className="todo-list">
       <div className="action-bar-wrapper">
-        <div className="left-actions-wrapper">
-          <Input
-            size="middle"
-            placeholder="+ 输入待办任务，点击回车即可创建"
-            className="w-400 create-todo-input"
-            onPressEnter={onCreateTodo}
-          />
-        </div>
+        {!isTrash && (
+          <div className="left-actions-wrapper">
+            <Input
+              size="middle"
+              placeholder="+ 输入待办任务，点击回车即可创建"
+              className="w-400 create-todo-input"
+              onPressEnter={onCreateTodo}
+              value={todoName}
+              onChange={onTodoNameChange}
+            />
+          </div>
+        )}
         <div className="right-actions-wrapper">
-          <Checkbox
+          {/* <Checkbox
             checked={onlyShowUnfinishedChecked}
             onChange={onOnlyShowUnfinishedCheckboxChange}
           >
-            只显示未完成
+            未完成
           </Checkbox>
           <Checkbox
             checked={onlyShowHighPriorityChecked}
             onChange={onOnlyShowHighPriorityCheckboxChange}
           >
-            只显示高优先级
-          </Checkbox>
-          <Button type="primary" onClick={onClickBtn} className="ml-10">
+            高优先级
+          </Checkbox> */}
+          {/* <Button type="primary" onClick={onClickBtn} className="ml-10">
             批量设置
-          </Button>
-          <Button danger onClick={onClickBtn} className="ml-10">
+          </Button> */}
+          {!isTrash && (
+            <Button
+              type="primary"
+              onClick={onClickBatchFinish}
+              className="ml-10"
+            >
+              批量完成
+            </Button>
+          )}
+          <Button danger onClick={onClickBatchDelete} className="ml-10">
             批量删除
           </Button>
         </div>
@@ -298,15 +599,21 @@ const TodoList = () => {
         dataSource={filteredDatasource}
         size="middle"
         pagination={false}
-        rowClassName="todo-item-row"
+        rowClassName={(record) => {
+          if (record.id === todoDetail.id) {
+            return 'selected-todo-item-row';
+          }
+          return 'todo-item-row';
+        }}
       />
 
       <TodoDrawer
-        open={todoDrawerOpen}
+        open={isTodoDrawerOpened}
         onClose={onTodoDrawerClose}
+        onSaveSuccess={onSaveSuccess}
       ></TodoDrawer>
-    </Wrapper>
+    </div>
   );
 };
 
-export default TodoList;
+export default memo(TodoList);

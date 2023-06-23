@@ -25,6 +25,16 @@ export declare global {
         lastInsertRowid: number;
       }>;
       getTodoList: AsyncFunction<{ result: Array<any> }>;
+      updateTodoPriority: AsyncFunction<any>;
+      updateTodoProgress: AsyncFunction<any>;
+      getTodoDetail: AsyncFunction<any>;
+      updateTodoDetail: AsyncFunction<any>;
+      batchFinishTodo: AsyncFunction<any>;
+      batchDeleteTodo: AsyncFunction<any>;
+      createPlanGroup: AsyncFunction<any>;
+      updatePlanGroup: AsyncFunction<any>;
+      deletePlanGroup: AsyncFunction<any>;
+      getPlanGroupList: AsyncFunction<any>;
     };
   }
 }

@@ -1,29 +1,50 @@
+import dayjs from 'dayjs';
+
 export const convertTimestampToDuration = (timestamp: number) => {
-  if (!timestamp) {
-    return '-';
+  const monthDiff = dayjs().diff(dayjs(timestamp), 'month');
+  if (monthDiff > 0) {
+    return formatTimestamp(timestamp);
   }
 
-  const minuteUnit = 60;
-  const hourUnit = 60 * minuteUnit;
-  const dayUnit = 24 * hourUnit;
-
-  timestamp = Math.floor(timestamp / 1000);
-
-  const day = Math.floor(timestamp / dayUnit);
-
-  if (day === 1) {
-    return '昨天';
+  const weekDiff = dayjs().diff(dayjs(timestamp), 'week');
+  if (weekDiff > 0) {
+    return `${weekDiff}周前`;
   }
 
-  if (day === 2) {
-    return '前天';
+  const dayDiff = dayjs().diff(dayjs(timestamp), 'day');
+
+  if (dayDiff > 0) {
+    return `${dayDiff}天前`;
   }
 
-  if (day > 2 && day < 7) {
-    return `${day}天前`;
+  const hourDiff = dayjs().diff(dayjs(timestamp), 'hour');
+  if (hourDiff > 0) {
+    return `${hourDiff}小时前`;
   }
 
-  if (day >= 7 && day < 7 * 4) {
-    return `${Math.floor(day / 7)}周前`;
+  const minuteDiff = dayjs().diff(dayjs(timestamp), 'minute');
+  if (minuteDiff > 0) {
+    return `${minuteDiff}分钟前`;
   }
+
+  return '刚刚';
 };
+
+/** 格式化时间戳 */
+export function formatTimestamp(timestamp: number) {
+  return dayjs(timestamp).format('YYYY/MM/DD HH:mm:ss');
+}
+
+export function buildTree(array, parentId = null) {
+  const tree = [];
+  for (const item of array) {
+    if (item.parentId === parentId) {
+      const children = buildTree(array, item.id);
+      if (children.length) {
+        item.children = children;
+      }
+      tree.push(item);
+    }
+  }
+  return tree;
+}

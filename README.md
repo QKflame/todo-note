@@ -29,7 +29,6 @@ npm run start
 - [x] 增加 react-router 的使用
 - [ ] 连接 sql or nosql 数据库 选择 sqlite3
 - [ ] 安装富文本编辑器 draft.js
-- [x] 添加 css-in-js styled-components
 - [x] import 自动排序
 - [] mui https://mui.com/material-ui/react-slider/
 
@@ -55,33 +54,23 @@ Better-sqlite npm 包文档：
 
 - https://www.npmjs.com/package/better-sqlite3
 
-
-
-
-
 # 接口梳理
 
 ## 计划相关 Plan
 
 ### 获取计划列表 getPlanList
 
-| 字段名     | 字段含义   | 字段类型 | 允许为 null | 默认值 |
-| ---------- | ---------- | -------- | ----------- | ------ |
-| id         | 计划Id     |          |             |        |
-| name       | 计划名称   |          |             |        |
-| parentId   | 父级 ID    |          |             |        |
-| planId     | 所属计划ID |          |             |        |
-| createTime | 创建时间   |          |             |        |
-| updateTime | 修改时间   |          |             |        |
-| deleteTime | 删除时间   |          |             |        |
-| priority   | 优先级     |          |             |        |
-| progress   | 进度       |          |             |        |
-
-
-
-
-
-
+| 字段名     | 字段含义    | 字段类型 | 允许为 null | 默认值 |
+| ---------- | ----------- | -------- | ----------- | ------ |
+| id         | 计划 Id     |          |             |        |
+| name       | 计划名称    |          |             |        |
+| parentId   | 父级 ID     |          |             |        |
+| planId     | 所属计划 ID |          |             |        |
+| createTime | 创建时间    |          |             |        |
+| updateTime | 修改时间    |          |             |        |
+| deleteTime | 删除时间    |          |             |        |
+| priority   | 优先级      |          |             |        |
+| progress   | 进度        |          |             |        |
 
 ```
 1,测试,1,1686442565367,1686442565367,
@@ -96,15 +85,8 @@ Better-sqlite npm 包文档：
 10,测试,1,1686442565367,1686442565367,
 ```
 
-
-
 ## 待办相关 Todo
 
 ### 获取待办列表 getTodoList
 
-
-
 ## 笔记相关 Note
-
-
-

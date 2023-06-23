@@ -17,4 +17,65 @@
   .ant-menu {
     border-inline-end: none !important;
   }
+
+  .group-menu-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .group-menu-add-btn {
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+    }
+  }
+
+  .plan-menu-item {
+    padding-right: 20px;
+    position: relative;
+    user-select: none;
+  }
+
+  .plan-menu-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ant-menu-item {
+    user-select: none;
+  }
+
+  .menu-action-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 800;
+    display: none;
+  }
+
+  .active-plan-menu-group-item {
+    .menu-action-btn {
+      right: 20px;
+    }
+  }
+
+  .active-plan-menu-item {
+    .menu-action-btn {
+      display: block;
+    }
+  }
+}
+
+.plan-menu-dropdown-container {
+  .ant-dropdown-menu-item {
+    padding: 0 !important;
+  }
+}
+
+.dropdown-action-name {
+  font-size: 12px;
 }
