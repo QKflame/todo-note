@@ -1,4 +1,5 @@
 import {app, BrowserWindow, ipcMain} from 'electron';
+import log from 'electron-log';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -32,6 +33,9 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+log.transports.file.level = 'debug';
+log.transports.file.file = '/Users/wangyuzhen01/Desktop/logFile.log';
+
 const createWindow = (): void => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -44,19 +48,25 @@ const createWindow = (): void => {
     }
   });
 
+  log.info(
+    'MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY',
+    MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
+  );
+  log.info('MAIN_WINDOW_WEBPACK_ENTRY', MAIN_WINDOW_WEBPACK_ENTRY);
+
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   mainWindow.webContents.on(
     'did-fail-load',
     (event, errorCode, errorDescription) => {
-      console.error(
-        `Main window failed to load: ${errorCode} ${errorDescription}`
-      );
+      log.info('event', event);
+      log.info('errCode', errorCode);
+      log.info('errorDescription', errorDescription);
     }
   );
 
-  console.log('app.isPackaged', app.isPackaged);
+  log.info('app.isPackaged', app.isPackaged);
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
@@ -77,6 +87,8 @@ app.on('ready', async () => {
 
   // 构造数据库文件路径
   const dbFilePath = path.join(dbDirectory, 'database.db');
+
+  log.info('dbFilePath', dbFilePath);
 
   // 连接 sqlite 数据库
   const db = new Database(dbFilePath);
