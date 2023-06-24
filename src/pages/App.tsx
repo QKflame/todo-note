@@ -24,6 +24,7 @@ const App = memo(() => {
         }}
       >
         <Routes>
+          <Route path="/" element={<Todo />}></Route>
           <Route path="todo" element={<Todo />}></Route>
         </Routes>
       </div>

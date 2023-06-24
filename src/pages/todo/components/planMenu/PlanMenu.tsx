@@ -2,6 +2,7 @@ import './planMenu.less';
 
 import {HolderOutlined, PlusOutlined, RestOutlined} from '@ant-design/icons';
 import {
+  Alert,
   Button,
   Dropdown,
   Form,
@@ -16,7 +17,7 @@ import {isNull, throttle} from 'lodash';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import {setCurrentPlanId, setPlans} from 'src/store/plan';
-import {buildTree} from 'src/utils/util';
+import {buildTree, findObjectById} from 'src/utils/util';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -44,8 +45,12 @@ const PlanMenu: React.FC = () => {
   const [selectedKeys, setSelectedKeys] = useState([currentPlanId.toString()]);
 
   const [createGroupOpened, setCreateGroupOpened] = useState(false);
+  const [createSubGroupOpened, setCreateSubGroupOpened] = useState(false);
+  const [editGroupOpened, setEditGroupOpened] = useState(false);
 
   const [createGroupForm] = Form.useForm();
+  const [createSubGroupForm] = Form.useForm();
+  const [editGroupForm] = Form.useForm();
 
   const onClickMenuItem = useCallback(
     (key) => {
@@ -89,8 +94,15 @@ const PlanMenu: React.FC = () => {
     (planGroupId) => {
       Modal.confirm({
         title: '删除分组',
-        content:
-          '是否确认删除当前分组，当前分组下的待办事项也将被删除，可前往废纸篓进行恢复！',
+        content: (
+          <div>
+            <div style={{marginBottom: 10}}>是否确认删除当前分组？</div>
+            <Alert
+              message="当前分组下的待办事项也将被删除，可前往废纸篓进行恢复！"
+              type="error"
+            ></Alert>
+          </div>
+        ),
         onOk: () => {
           window.api.deletePlanGroup({id: planGroupId}).then(() => {
             message.success('删除成功');
@@ -103,6 +115,18 @@ const PlanMenu: React.FC = () => {
     },
     [dispatch, getPlanGroupList]
   );
+
+  /** 监听编辑分组 */
+  const onEditPlanGroup = useCallback(() => {
+    const planDetail = findObjectById(plans, currentPlanId);
+    editGroupForm.setFieldValue('groupName', planDetail.title);
+    setEditGroupOpened(true);
+  }, [currentPlanId, editGroupForm, plans]);
+
+  /** 监听点击创建子分组 */
+  const onCreateSuPlanGroup = useCallback(() => {
+    setCreateSubGroupOpened(true);
+  }, []);
 
   const getPlanMenuItem = useCallback(
     (item) => {
@@ -125,7 +149,11 @@ const PlanMenu: React.FC = () => {
                   {
                     key: 'editGroup',
                     label: (
-                      <Button type="text" className="dropdown-action-name">
+                      <Button
+                        type="text"
+                        className="dropdown-action-name"
+                        onClick={onEditPlanGroup}
+                      >
                           编辑
                       </Button>
                     )
@@ -133,7 +161,11 @@ const PlanMenu: React.FC = () => {
                   {
                     key: 'createGroup',
                     label: (
-                      <Button type="text" className="dropdown-action-name">
+                      <Button
+                        type="text"
+                        className="dropdown-action-name"
+                        onClick={onCreateSuPlanGroup}
+                      >
                           创建
                       </Button>
                     )
@@ -143,7 +175,11 @@ const PlanMenu: React.FC = () => {
                   {
                     key: 'editGroup',
                     label: (
-                      <Button type="text" className="dropdown-action-name">
+                      <Button
+                        type="text"
+                        className="dropdown-action-name"
+                        onClick={onEditPlanGroup}
+                      >
                           编辑
                       </Button>
                     )
@@ -151,7 +187,11 @@ const PlanMenu: React.FC = () => {
                   {
                     key: 'createGroup',
                     label: (
-                      <Button type="text" className="dropdown-action-name">
+                      <Button
+                        type="text"
+                        className="dropdown-action-name"
+                        onClick={onCreateSuPlanGroup}
+                      >
                           创建
                       </Button>
                     )
@@ -181,7 +221,13 @@ const PlanMenu: React.FC = () => {
         item?.children?.length ? item.children.map(getPlanMenuItem) : undefined
       );
     },
-    [onClickMenuItem, onDeleteGroup, selectedKeys]
+    [
+      onClickMenuItem,
+      onCreateSuPlanGroup,
+      onDeleteGroup,
+      onEditPlanGroup,
+      selectedKeys
+    ]
   );
 
   const getMenuItems = useCallback(() => {
@@ -261,11 +307,79 @@ const PlanMenu: React.FC = () => {
     }
   );
 
+  // 确认创建子分组
+  const onConfirmCreateSubGroup = throttle(
+    () => {
+      const {groupName} = createSubGroupForm.getFieldsValue();
+      if (!groupName) {
+        message.warning('请输入分组名称');
+        return;
+      }
+      window.api
+        .createPlanGroup({
+          title: groupName,
+          parentId: currentPlanId
+        })
+        .then((res) => {
+          if (res.changes === 1) {
+            message.success('创建成功');
+            onCancelCreateSubGroup();
+            getPlanGroupList();
+          }
+        });
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
+  );
+
+  // 确认创建子分组
+  const onConfirmEditGroup = throttle(
+    () => {
+      const {groupName} = editGroupForm.getFieldsValue();
+      if (!groupName) {
+        message.warning('请输入分组名称');
+        return;
+      }
+      window.api
+        .updatePlanGroup({
+          title: groupName,
+          id: currentPlanId
+        })
+        .then((res) => {
+          if (res.changes === 1) {
+            message.success('修改成功');
+            onCancelEditGroup();
+            getPlanGroupList();
+          }
+        });
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
+  );
+
   // 取消创建分组
   const onCancelCreateGroup = useCallback(() => {
     createGroupForm.resetFields();
     setCreateGroupOpened(false);
   }, [createGroupForm]);
+
+  // 取消创建子分组
+  const onCancelCreateSubGroup = useCallback(() => {
+    createSubGroupForm.resetFields();
+    setCreateSubGroupOpened(false);
+  }, [createSubGroupForm]);
+
+  // 取消编辑分组
+  const onCancelEditGroup = useCallback(() => {
+    editGroupForm.resetFields();
+    setEditGroupOpened(false);
+  }, [editGroupForm]);
 
   return (
     <div className="plan-menu-container" style={{width: 280}}>
@@ -291,6 +405,54 @@ const PlanMenu: React.FC = () => {
             <Input
               style={{width: '100%'}}
               onPressEnter={onConfirmCreateGroup}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="创建分组"
+        open={createSubGroupOpened}
+        onOk={onConfirmCreateSubGroup}
+        onCancel={onCancelCreateSubGroup}
+      >
+        <Form
+          name="createSubGroupForm"
+          colon={false}
+          labelCol={{span: 4}}
+          wrapperCol={{span: 20}}
+          style={{maxWidth: 600, marginTop: 20}}
+          autoComplete="off"
+          form={createSubGroupForm}
+        >
+          <Form.Item label="分组名称" name="groupName">
+            <Input
+              style={{width: '100%'}}
+              onPressEnter={onConfirmCreateSubGroup}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="编辑分组"
+        open={editGroupOpened}
+        onOk={onConfirmEditGroup}
+        onCancel={onCancelEditGroup}
+      >
+        <Form
+          name="editGroupForm"
+          colon={false}
+          labelCol={{span: 4}}
+          wrapperCol={{span: 20}}
+          style={{maxWidth: 600, marginTop: 20}}
+          autoComplete="off"
+          form={editGroupForm}
+        >
+          <Form.Item label="分组名称" name="groupName">
+            <Input
+              style={{width: '100%'}}
+              onPressEnter={onConfirmEditGroup}
             />
           </Form.Item>
         </Form>

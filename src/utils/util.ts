@@ -48,3 +48,47 @@ export function buildTree(array, parentId = null) {
   }
   return tree;
 }
+
+export function findObjectById(tree, id) {
+  if (!tree || !Array.isArray(tree)) {
+    return null;
+  }
+
+  for (const obj of tree) {
+    if (obj.id === id) {
+      return obj;
+    }
+
+    if (obj.children && obj.children.length > 0) {
+      const foundObject = findObjectById(obj.children, id);
+      if (foundObject) {
+        return foundObject;
+      }
+    }
+  }
+
+  return null;
+}
+
+export function convertPlanList(plans, currentPlanId) {
+  const fn = (plan) => {
+    const {id, ...rest} = plan;
+    const newObj = {
+      ...rest,
+      value: id,
+      ...(id === currentPlanId ? {disabled: true} : {})
+    };
+    if (plan.children && plan.children.length > 0) {
+      newObj.children = plan.children.map(fn);
+    }
+    return newObj;
+  };
+
+  const _plans = plans.map(fn);
+  _plans.unshift({
+    value: '-1',
+    title: '近期待办',
+    ...('-1' === currentPlanId ? {disabled: true} : {})
+  });
+  return _plans;
+}

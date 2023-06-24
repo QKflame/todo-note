@@ -4,6 +4,8 @@ import path from 'path';
 import {
   batchDeleteTodo,
   batchFinishTodo,
+  batchRecoverTodo,
+  batchRemoveGroup,
   createPlanGroup,
   deletePlanGroup,
   getPlanGroupList,
@@ -35,13 +37,26 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    icon: path.join(__dirname, './assets/logo.ico'),
     webPreferences: {
+      devTools: false,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
     }
   });
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+  mainWindow.webContents.on(
+    'did-fail-load',
+    (event, errorCode, errorDescription) => {
+      console.error(
+        `Main window failed to load: ${errorCode} ${errorDescription}`
+      );
+    }
+  );
+
+  console.log('app.isPackaged', app.isPackaged);
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
@@ -95,6 +110,8 @@ app.on('ready', async () => {
   ipcMain.handle('api:updatePlanGroup', apiWrapper(updatePlanGroup));
   ipcMain.handle('api:deletePlanGroup', apiWrapper(deletePlanGroup));
   ipcMain.handle('api:getPlanGroupList', apiWrapper(getPlanGroupList));
+  ipcMain.handle('api:batchRecoverTodo', apiWrapper(batchRecoverTodo));
+  ipcMain.handle('api:batchRemoveGroup', apiWrapper(batchRemoveGroup));
 
   createWindow();
 });

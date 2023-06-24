@@ -1,15 +1,16 @@
 import './header.less';
 
-import {UserOutlined} from '@ant-design/icons';
+import {CalendarOutlined, UserOutlined} from '@ant-design/icons';
 import {Avatar, Menu, MenuProps} from 'antd';
-import {useCallback} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useCallback, useEffect, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {useAppSelector} from 'src/hooks/store';
 
 const menuItems: MenuProps['items'] = [
   {
     label: '我的待办',
-    key: 'todo'
+    key: 'todo',
+    icon: <CalendarOutlined />
   }
 ];
 
@@ -20,6 +21,11 @@ const Header = () => {
     (state) => state.style.headerMarginBottom
   );
 
+  const [selectedKeys, setSelectedKeys] = useState([]);
+
+  const location = useLocation();
+  console.log('location', location);
+
   const onClickMenu = useCallback(
     (e: { key: string }) => {
       navigate(e.key);
@@ -27,13 +33,24 @@ const Header = () => {
     [navigate]
   );
 
+  useEffect(() => {
+    if (location.pathname === '/' || location.pathname === '/todo') {
+      setSelectedKeys(['todo']);
+    }
+  }, [location.pathname]);
+
   return (
     <div
       className="app-header"
       style={{height: headerHeight, marginBottom: headerMarginBottom}}
     >
       <div>
-        <Menu mode="horizontal" items={menuItems} onClick={onClickMenu}></Menu>
+        <Menu
+          mode="horizontal"
+          items={menuItems}
+          onClick={onClickMenu}
+          selectedKeys={selectedKeys}
+        ></Menu>
       </div>
       <div>
         <Avatar

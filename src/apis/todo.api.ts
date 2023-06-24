@@ -98,6 +98,18 @@ export async function batchFinishTodo(db, event, params) {
 
 /** 批量删除待办事项 */
 export async function batchDeleteTodo(db, event, params) {
+  // 在废纸篓中删除
+  if (params.hard) {
+    const transaction = db.transaction(() => {
+      const deleteStatement = db.prepare('DELETE FROM todos WHERE id = ?');
+
+      for (const id of params.ids) {
+        deleteStatement.run(id);
+      }
+    });
+    return transaction();
+  }
+
   const statement = db.prepare(
     'update todos set deleteTime = @deleteTime, updateTime = @updateTime where id = @id'
   );
@@ -112,6 +124,53 @@ export async function batchDeleteTodo(db, event, params) {
     }
   });
   return transaction(params.ids);
+}
+
+/** 批量恢复待办事项 */
+export async function batchRecoverTodo(db, event, params) {
+  const cachedPlanIds: any = {};
+  const transaction = db.transaction(() => {
+    for (const todoId of params.ids) {
+      const getTodoDetailStatement = db.prepare(
+        'select name, id, planId, content from todos where id = ?'
+      );
+      const todoDetail = getTodoDetailStatement.get(todoId);
+
+      const planId = todoDetail.planId;
+
+      const getPlanDetailStatement = db.prepare(
+        `select id, deleteTime from plans where id = ?`
+      );
+
+      const updateTodoStatement = db.prepare(
+        `update todos set deleteTime = null, planId = ? where id = ?`
+      );
+
+      // 分组未被删除
+      if (cachedPlanIds[planId] === 1) {
+        updateTodoStatement.run(planId, todoId);
+        return;
+      }
+
+      // 分组被删除
+      if (cachedPlanIds[planId] === 2) {
+        updateTodoStatement.run(-1, todoId);
+      }
+
+      const planDetail = getPlanDetailStatement.get(planId);
+      // 分组未被删除
+      if (!planDetail.deleteTime) {
+        cachedPlanIds[todoDetail.planId] = 1;
+        updateTodoStatement.run(planId, todoId);
+        return;
+      }
+
+      // 分组已被删除
+      cachedPlanIds[todoDetail.planId] = 2;
+      updateTodoStatement.run(-1, todoId);
+    }
+  });
+  return transaction();
 }
 
 /** 新建分组 */
@@ -167,4 +226,15 @@ export async function getPlanGroupList(db) {
   return {
     result
   };
+}
+
+/** 批量移动分组 */
+export async function batchRemoveGroup(db, event, params) {
+  const transaction = db.transaction(() => {
+    for (const id of params.ids) {
+      const statement = db.prepare('update todos set planId = ? where id = ?');
+      statement.run(params.planId, id);
+    }
+  });
+  return transaction();
 }

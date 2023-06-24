@@ -10,8 +10,10 @@ import {
 } from '@ant-design/icons';
 import {useRequest} from 'ahooks';
 import {
+  Alert,
   Button,
   Checkbox,
+  Form,
   Input,
   message,
   Modal,
@@ -20,7 +22,9 @@ import {
   Segmented,
   Slider,
   Table,
-  Tag
+  Tag,
+  Tree,
+  TreeSelect
 } from 'antd';
 import type {ColumnsType} from 'antd/es/table';
 import {cloneDeep, debounce, orderBy, throttle} from 'lodash';
@@ -35,7 +39,11 @@ import {
   toggleOnlyShowUnfinishedChecked
 } from 'src/store/todos';
 import {TodoItem} from 'src/types';
-import {convertTimestampToDuration, formatTimestamp} from 'src/utils/util';
+import {
+  convertPlanList,
+  convertTimestampToDuration,
+  formatTimestamp
+} from 'src/utils/util';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
 
@@ -43,6 +51,10 @@ const TodoList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [datasource, setDatasource] = useState<Array<TodoItem>>([]);
   const [todoName, setTodoName] = useState('');
+
+  const [batchRemoveOpened, setBatchRemoveOpened] = useState(false);
+
+  const [batchRemoveForm] = Form.useForm();
 
   // 只显示未完成
   const onlyShowUnfinishedChecked = useAppSelector(
@@ -193,7 +205,8 @@ const TodoList = () => {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               height: '32px',
-              lineHeight: '32px'
+              lineHeight: '32px',
+              fontSize: 13
             }}
           >
             {value}
@@ -467,6 +480,22 @@ const TodoList = () => {
     }
   );
 
+  /** 点击批量移动 */
+  const onClickBatchRemove = throttle(
+    () => {
+      if (!selectedRowKeys.length) {
+        message.warning('请选择待办事项');
+        return;
+      }
+      setBatchRemoveOpened(true);
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
+  );
+
   // 点击批量删除按钮
   const onClickBatchDelete = throttle(
     () => {
@@ -477,28 +506,85 @@ const TodoList = () => {
       if (isTrash) {
         Modal.confirm({
           title: '批量删除',
-          content:
-            '是否批量删除已选择的待办事项？在废纸篓中进行删除后，无法恢复，请谨慎操作!',
+          content: (
+            <div>
+              <div style={{marginBottom: 10}}>
+                是否批量删除已选择的待办事项？
+              </div>
+              <Alert
+                message="在废纸篓中进行删除后，无法恢复，请谨慎操作!"
+                type="error"
+              />
+            </div>
+          ),
           okText: '确认',
           cancelText: '取消',
           onOk: () => {
-            window.api.batchDeleteTodo({ids: selectedRowKeys}).then(() => {
-              message.success('删除成功');
-              setSelectedRowKeys([]);
-              getTodoLists();
-            });
+            window.api
+              .batchDeleteTodo({ids: selectedRowKeys, hard: true})
+              .then(() => {
+                message.success('删除成功');
+                setSelectedRowKeys([]);
+                getTodoLists();
+              });
           }
         });
         return;
       }
       Modal.confirm({
         title: '批量删除',
-        content: '是否批量删除已选择的待办事项？',
+        content: (
+          <div>
+            <div style={{marginBottom: 10}}>
+              是否批量删除已选择的待办事项？
+            </div>
+            <Alert message="删除之后可在废纸篓中进行恢复" type="info" />
+          </div>
+        ),
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
           window.api.batchDeleteTodo({ids: selectedRowKeys}).then(() => {
             message.success('删除成功');
+            setSelectedRowKeys([]);
+            getTodoLists();
+          });
+        }
+      });
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
+  );
+
+  // 点击批量恢复按钮
+  const onClickBatchRecover = throttle(
+    () => {
+      if (!selectedRowKeys.length) {
+        message.warning('请选择待办事项');
+        return;
+      }
+
+      Modal.confirm({
+        title: '批量恢复',
+        content: (
+          <div>
+            <div style={{marginBottom: 10}}>
+              是否批量恢复已选择的待办事项？
+            </div>
+            <Alert
+              message="若待办事项所属分组已被删除，则恢复至 「近期待办」 分组中，若未被删除，则恢复至原分组中。"
+              type="info"
+            />
+          </div>
+        ),
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          window.api.batchRecoverTodo({ids: selectedRowKeys}).then(() => {
+            message.success('恢复成功');
             setSelectedRowKeys([]);
             getTodoLists();
           });
@@ -547,6 +633,55 @@ const TodoList = () => {
     setTodoName(e.target.value);
   }, []);
 
+  const [removeGroup, setRemoveGroup] = useState<string>();
+
+  /** 监听点击确认批量移动按钮 */
+  const onConfirmBatchRemove = useCallback(
+    throttle(
+      () => {
+        if (!removeGroup) {
+          message.warning('请选择移动分组');
+          return;
+        }
+
+        window.api
+          .batchRemoveGroup({ids: selectedRowKeys, planId: removeGroup})
+          .then((res) => {
+            setRemoveGroup('');
+            batchRemoveForm.resetFields();
+            message.success('移动成功');
+            onCancelBatchRemove();
+            getTodoLists();
+          });
+      },
+      3000,
+      {
+        leading: true,
+        trailing: false
+      }
+    ),
+    [removeGroup]
+  );
+
+  /** 监听点击取消批量移动按钮 */
+  const onCancelBatchRemove = useCallback(() => {
+    setBatchRemoveOpened(false);
+  }, []);
+
+  const plans = useAppSelector((state) => state.plan.plans);
+
+  const planList = useMemo(() => {
+    return convertPlanList(plans, currentPlanId);
+  }, [currentPlanId, plans]);
+
+  const onRemoveGroupChange = useCallback((newValue: string) => {
+    setRemoveGroup(newValue);
+  }, []);
+
+  const filterTreeNode = useCallback((inputValue, treeNode) => {
+    return treeNode?.title?.includes(inputValue);
+  }, []);
+
   return (
     <div className="todo-list">
       <div className="action-bar-wrapper">
@@ -581,10 +716,28 @@ const TodoList = () => {
           {!isTrash && (
             <Button
               type="primary"
+              onClick={onClickBatchRemove}
+              className="ml-10"
+            >
+              批量移动
+            </Button>
+          )}
+          {!isTrash && (
+            <Button
+              type="primary"
               onClick={onClickBatchFinish}
               className="ml-10"
             >
               批量完成
+            </Button>
+          )}
+          {isTrash && (
+            <Button
+              type="primary"
+              onClick={onClickBatchRecover}
+              className="ml-10"
+            >
+              批量恢复
             </Button>
           )}
           <Button danger onClick={onClickBatchDelete} className="ml-10">
@@ -592,6 +745,16 @@ const TodoList = () => {
           </Button>
         </div>
       </div>
+
+      {isTrash && (
+        <Alert
+          showIcon
+          type="warning"
+          message="废纸篓中的数据不可设置内容、优先级及进度等信息，若要设置，请恢复之后进行操作。"
+          style={{marginBottom: 20}}
+        ></Alert>
+      )}
+
       <Table
         rowSelection={rowSelection}
         columns={columns}
@@ -612,6 +775,37 @@ const TodoList = () => {
         onClose={onTodoDrawerClose}
         onSaveSuccess={onSaveSuccess}
       ></TodoDrawer>
+
+      <Modal
+        title="移动分组"
+        open={batchRemoveOpened}
+        onOk={onConfirmBatchRemove}
+        onCancel={onCancelBatchRemove}
+      >
+        <Form
+          name="editGroupForm"
+          colon={false}
+          labelCol={{span: 4}}
+          wrapperCol={{span: 20}}
+          style={{maxWidth: 600, marginTop: 20}}
+          autoComplete="off"
+          form={batchRemoveForm}
+        >
+          <Form.Item label="移动到" name="group">
+            <TreeSelect
+              showSearch
+              value={removeGroup}
+              dropdownStyle={{maxHeight: 400, overflow: 'auto'}}
+              placeholder="请选择移动分组"
+              allowClear
+              treeDefaultExpandAll
+              onChange={onRemoveGroupChange}
+              treeData={planList}
+              filterTreeNode={filterTreeNode}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

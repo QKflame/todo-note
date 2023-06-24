@@ -24,5 +24,9 @@ contextBridge.exposeInMainWorld('api', {
   deletePlanGroup: (...args) =>
     ipcRenderer.invoke('api:deletePlanGroup', ...args),
   getPlanGroupList: (...args) =>
-    ipcRenderer.invoke('api:getPlanGroupList', ...args)
+    ipcRenderer.invoke('api:getPlanGroupList', ...args),
+  batchRecoverTodo: (...args) =>
+    ipcRenderer.invoke('api:batchRecoverTodo', ...args),
+  batchRemoveGroup: (...args) =>
+    ipcRenderer.invoke('api:batchRemoveGroup', ...args)
 });

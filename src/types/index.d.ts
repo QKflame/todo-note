@@ -35,6 +35,8 @@ export declare global {
       updatePlanGroup: AsyncFunction<any>;
       deletePlanGroup: AsyncFunction<any>;
       getPlanGroupList: AsyncFunction<any>;
+      batchRecoverTodo: AsyncFunction<any>;
+      batchRemoveGroup: AsyncFunction<any>;
     };
   }
 }
