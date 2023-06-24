@@ -1,6 +1,6 @@
 {
   "name": "todo-note",
-  "productName": "todo-note",
+  "productName": "待办笔记",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",

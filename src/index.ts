@@ -1,5 +1,5 @@
 import {app, BrowserWindow, ipcMain} from 'electron';
-import log from 'electron-log';
+// import log from 'electron-log';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -33,8 +33,8 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-log.transports.file.level = 'debug';
-log.transports.file.file = '/Users/wangyuzhen01/Desktop/logFile.log';
+// log.transports.file.level = 'debug';
+// log.transports.file.file = '/Users/wangyuzhen01/Desktop/logFile.log';
 
 const createWindow = (): void => {
   // Create the browser window.
@@ -48,25 +48,25 @@ const createWindow = (): void => {
     }
   });
 
-  log.info(
-    'MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY',
-    MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
-  );
-  log.info('MAIN_WINDOW_WEBPACK_ENTRY', MAIN_WINDOW_WEBPACK_ENTRY);
+  // log.info(
+  //   'MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY',
+  //   MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
+  // );
+  // log.info('MAIN_WINDOW_WEBPACK_ENTRY', MAIN_WINDOW_WEBPACK_ENTRY);
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  mainWindow.webContents.on(
-    'did-fail-load',
-    (event, errorCode, errorDescription) => {
-      log.info('event', event);
-      log.info('errCode', errorCode);
-      log.info('errorDescription', errorDescription);
-    }
-  );
+  // mainWindow.webContents.on(
+  //   'did-fail-load',
+  //   (event, errorCode, errorDescription) => {
+  //     log.info('event', event);
+  //     log.info('errCode', errorCode);
+  //     log.info('errorDescription', errorDescription);
+  //   }
+  // );
 
-  log.info('app.isPackaged', app.isPackaged);
+  // log.info('app.isPackaged', app.isPackaged);
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
@@ -88,18 +88,40 @@ app.on('ready', async () => {
   // 构造数据库文件路径
   const dbFilePath = path.join(dbDirectory, 'database.db');
 
-  log.info('dbFilePath', dbFilePath);
+  // log.info('dbFilePath', dbFilePath);
 
   // 连接 sqlite 数据库
   const db = new Database(dbFilePath);
 
-  // TODO: 需要在此处控制数据库版本，并初始化响应的表结构
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS todos (
-      id   INTEGER   PRIMARY KEY AUTOINCREMENT,
-      name TEXT (40) NOT NULL
-    );
-  `);
+  // 初始化的 sql 语句
+  const initSql = `
+  -- 表：plans
+  CREATE TABLE IF NOT EXISTS plans (
+      id         INTEGER      PRIMARY KEY AUTOINCREMENT
+                              UNIQUE
+                              NOT NULL,
+      title      TEXT (30)    NOT NULL,
+      deleteTime INTEGER (13),
+      parentId   INTEGER,
+      createTime INTEGER (13) NOT NULL
+  );
+
+
+  -- 表：todos
+  CREATE TABLE IF NOT EXISTS todos (
+      id         INTEGER      PRIMARY KEY AUTOINCREMENT,
+      name       TEXT (40)    NOT NULL,
+      planId     INTEGER      NOT NULL,
+      createTime INTEGER (13) NOT NULL,
+      updateTime INTEGER (13) NOT NULL,
+      deleteTime BLOB (13),
+      priority   INTEGER (1),
+      progress   INTEGER (1),
+      content    TEXT
+  );
+  `;
+
+  db.exec(initSql);
 
   // 对 API 接口进行一层封装
   const apiWrapper = (fn) => {
