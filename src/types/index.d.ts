@@ -31,10 +31,10 @@ export declare global {
       updateTodoDetail: AsyncFunction<any>;
       batchFinishTodo: AsyncFunction<any>;
       batchDeleteTodo: AsyncFunction<any>;
-      createPlanGroup: AsyncFunction<any>;
-      updatePlanGroup: AsyncFunction<any>;
-      deletePlanGroup: AsyncFunction<any>;
-      getPlanGroupList: AsyncFunction<any>;
+      createTodoGroup: AsyncFunction<any>;
+      updateTodoGroup: AsyncFunction<any>;
+      deleteTodoGroup: AsyncFunction<any>;
+      getTodoGroupList: AsyncFunction<any>;
       batchRecoverTodo: AsyncFunction<any>;
       batchRemoveGroup: AsyncFunction<any>;
     };

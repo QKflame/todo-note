@@ -1,12 +1,13 @@
 import './todo.less';
 
-import PlanMenu from './components/planMenu/PlanMenu';
+import GroupMenu from 'src/components/groupMenu/GroupMenu';
+
 import TodoList from './components/todoList/TodoList';
 
 const Todo = () => {
   return (
     <div className="todo-page">
-      <PlanMenu></PlanMenu>
+      <GroupMenu></GroupMenu>
       <TodoList></TodoList>
     </div>
   );

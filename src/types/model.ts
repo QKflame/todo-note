@@ -13,7 +13,7 @@ export enum TodoPriority {
   P2
 }
 
-export interface PlanProperties {
+export interface GroupProperties {
   /** 父级 ID */
   parent_id: string;
   /** 主键 ID */
@@ -30,7 +30,7 @@ export interface PlanProperties {
 
 export interface TodoProperties {
   /** 计划 ID */
-  plan_id: string;
+  group_id: string;
   /** 主键 ID */
   _id: string;
   /** 标题 */

@@ -1,6 +1,10 @@
 import './header.less';
 
-import {CalendarOutlined, UserOutlined} from '@ant-design/icons';
+import {
+  CarryOutOutlined,
+  ReadOutlined,
+  UserOutlined
+} from '@ant-design/icons';
 import {Avatar, Menu, MenuProps} from 'antd';
 import {useCallback, useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
@@ -10,7 +14,12 @@ const menuItems: MenuProps['items'] = [
   {
     label: '我的待办',
     key: 'todo',
-    icon: <CalendarOutlined />
+    icon: <CarryOutOutlined />
+  },
+  {
+    label: '我的笔记',
+    key: 'note',
+    icon: <ReadOutlined />
   }
 ];
 
@@ -24,7 +33,6 @@ const Header = () => {
   const [selectedKeys, setSelectedKeys] = useState([]);
 
   const location = useLocation();
-  console.log('location', location);
 
   const onClickMenu = useCallback(
     (e: { key: string }) => {
@@ -36,6 +44,10 @@ const Header = () => {
   useEffect(() => {
     if (location.pathname === '/' || location.pathname === '/todo') {
       setSelectedKeys(['todo']);
+      return;
+    }
+    if (location.pathname === '/note') {
+      setSelectedKeys(['note']);
     }
   }, [location.pathname]);
 

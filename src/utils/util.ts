@@ -70,25 +70,25 @@ export function findObjectById(tree, id) {
   return null;
 }
 
-export function convertPlanList(plans, currentPlanId) {
-  const fn = (plan) => {
-    const {id, ...rest} = plan;
+export function convertGroupList(groups, currentGroupId) {
+  const fn = (group) => {
+    const {id, ...rest} = group;
     const newObj = {
       ...rest,
       value: id,
-      ...(id === currentPlanId ? {disabled: true} : {})
+      ...(id === currentGroupId ? {disabled: true} : {})
     };
-    if (plan.children && plan.children.length > 0) {
-      newObj.children = plan.children.map(fn);
+    if (group.children && group.children.length > 0) {
+      newObj.children = group.children.map(fn);
     }
     return newObj;
   };
 
-  const _plans = plans.map(fn);
-  _plans.unshift({
+  const _groups = groups.map(fn);
+  _groups.unshift({
     value: '-1',
     title: '近期待办',
-    ...('-1' === currentPlanId ? {disabled: true} : {})
+    ...('-1' === currentGroupId ? {disabled: true} : {})
   });
-  return _plans;
+  return _groups;
 }

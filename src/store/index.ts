@@ -1,7 +1,7 @@
 import {configureStore} from '@reduxjs/toolkit';
 
+import group from './group';
 import i18n from './i18n';
-import plan from './plan';
 import style from './style';
 import todos from './todos';
 
@@ -10,7 +10,7 @@ export const store = configureStore({
     todos,
     i18n,
     style,
-    plan
+    group
   }
 });
 

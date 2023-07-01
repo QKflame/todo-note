@@ -30,7 +30,7 @@ import type {ColumnsType} from 'antd/es/table';
 import {cloneDeep, debounce, orderBy, throttle} from 'lodash';
 import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
-import {isTrashSelector} from 'src/store/plan';
+import {isTrashSelector} from 'src/store/group';
 import {
   resetTodoDetail,
   setTodoDetail,
@@ -40,7 +40,7 @@ import {
 } from 'src/store/todos';
 import {TodoItem} from 'src/types';
 import {
-  convertPlanList,
+  convertGroupList,
   convertTimestampToDuration,
   formatTimestamp
 } from 'src/utils/util';
@@ -76,7 +76,7 @@ const TodoList = () => {
   // 当前打开抽屉的 todo
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
 
-  const currentPlanId = useAppSelector((state) => state.plan.currentPlanId);
+  const currentGroupId = useAppSelector((state) => state.group.currentGroupId);
 
   const dispatch = useAppDispatch();
 
@@ -120,8 +120,8 @@ const TodoList = () => {
   });
 
   const getTodoLists = useCallback(() => {
-    queryTodoLists({planId: currentPlanId});
-  }, [currentPlanId, queryTodoLists]);
+    queryTodoLists({groupId: currentGroupId});
+  }, [currentGroupId, queryTodoLists]);
 
   useEffect(() => {
     getTodoLists();
@@ -603,7 +603,7 @@ const TodoList = () => {
       window.api
         .createTodo({
           name: e.target.value,
-          planId: currentPlanId
+          groupId: currentGroupId
         })
         .then((res) => {
           if (res.changes) {
@@ -614,12 +614,12 @@ const TodoList = () => {
         });
       e.target.value = '';
     },
-    [currentPlanId, getTodoLists]
+    [currentGroupId, getTodoLists]
   );
 
   useEffect(() => {
     setSelectedRowKeys([]);
-  }, [currentPlanId]);
+  }, [currentGroupId]);
 
   // const onOnlyShowUnfinishedCheckboxChange = useCallback(() => {
   //   dispatch(toggleOnlyShowUnfinishedChecked());
@@ -645,7 +645,7 @@ const TodoList = () => {
         }
 
         window.api
-          .batchRemoveGroup({ids: selectedRowKeys, planId: removeGroup})
+          .batchRemoveGroup({ids: selectedRowKeys, groupId: removeGroup})
           .then((res) => {
             setRemoveGroup('');
             batchRemoveForm.resetFields();
@@ -668,11 +668,11 @@ const TodoList = () => {
     setBatchRemoveOpened(false);
   }, []);
 
-  const plans = useAppSelector((state) => state.plan.plans);
+  const groups = useAppSelector((state) => state.group.groups);
 
-  const planList = useMemo(() => {
-    return convertPlanList(plans, currentPlanId);
-  }, [currentPlanId, plans]);
+  const groupList = useMemo(() => {
+    return convertGroupList(groups, currentGroupId);
+  }, [currentGroupId, groups]);
 
   const onRemoveGroupChange = useCallback((newValue: string) => {
     setRemoveGroup(newValue);
@@ -800,7 +800,7 @@ const TodoList = () => {
               allowClear
               treeDefaultExpandAll
               onChange={onRemoveGroupChange}
-              treeData={planList}
+              treeData={groupList}
               filterTreeNode={filterTreeNode}
             />
           </Form.Item>

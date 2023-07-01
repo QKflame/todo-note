@@ -1,4 +1,4 @@
-import './planMenu.less';
+import './groupMenu.less';
 
 import {HolderOutlined, PlusOutlined, RestOutlined} from '@ant-design/icons';
 import {
@@ -16,7 +16,7 @@ import cx from 'classnames';
 import {isNull, throttle} from 'lodash';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
-import {setCurrentPlanId, setPlans} from 'src/store/plan';
+import {setCurrentGroupId, setGroups} from 'src/store/group';
 import {buildTree, findObjectById} from 'src/utils/util';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -37,12 +37,12 @@ function getItem(
   } as MenuItem;
 }
 
-const PlanMenu: React.FC = () => {
-  const currentPlanId = useAppSelector((state) => state.plan.currentPlanId);
-  const plans = useAppSelector((state) => state.plan.plans);
+const GroupMenu: React.FC = () => {
+  const currentGroupId = useAppSelector((state) => state.group.currentGroupId);
+  const groups = useAppSelector((state) => state.group.groups);
   const dispatch = useAppDispatch();
 
-  const [selectedKeys, setSelectedKeys] = useState([currentPlanId.toString()]);
+  const [selectedKeys, setSelectedKeys] = useState([currentGroupId.toString()]);
 
   const [createGroupOpened, setCreateGroupOpened] = useState(false);
   const [createSubGroupOpened, setCreateSubGroupOpened] = useState(false);
@@ -54,17 +54,17 @@ const PlanMenu: React.FC = () => {
 
   const onClickMenuItem = useCallback(
     (key) => {
-      if (key === currentPlanId) {
+      if (key === currentGroupId) {
         return;
       }
-      dispatch(setCurrentPlanId({planId: key}));
+      dispatch(setCurrentGroupId({groupId: key}));
       setSelectedKeys([key.toString()]);
     },
-    [currentPlanId, dispatch]
+    [currentGroupId, dispatch]
   );
 
-  const getPlanGroupList = useCallback(() => {
-    window.api.getPlanGroupList().then((res) => {
+  const getTodoGroupList = useCallback(() => {
+    window.api.getTodoGroupList().then((res) => {
       if (res.result) {
         const tree = buildTree(
           res.result.map((item) => {
@@ -75,14 +75,14 @@ const PlanMenu: React.FC = () => {
             };
           })
         );
-        dispatch(setPlans({plans: tree}));
+        dispatch(setGroups({groups: tree}));
       }
     });
   }, [dispatch]);
 
   useEffect(() => {
-    getPlanGroupList();
-  }, [getPlanGroupList]);
+    getTodoGroupList();
+  }, [getTodoGroupList]);
 
   // 监听点击创建分组按钮
   const onClickCreateGroupBtn = useCallback(() => {
@@ -91,7 +91,7 @@ const PlanMenu: React.FC = () => {
 
   /** 监听删除分组 */
   const onDeleteGroup = useCallback(
-    (planGroupId) => {
+    (groupId) => {
       Modal.confirm({
         title: '删除分组',
         content: (
@@ -104,45 +104,45 @@ const PlanMenu: React.FC = () => {
           </div>
         ),
         onOk: () => {
-          window.api.deletePlanGroup({id: planGroupId}).then(() => {
+          window.api.deleteTodoGroup({id: groupId}).then(() => {
             message.success('删除成功');
-            getPlanGroupList();
+            getTodoGroupList();
             setSelectedKeys(['-1']);
-            dispatch(setCurrentPlanId({planId: '-1'}));
+            dispatch(setCurrentGroupId({groupId: '-1'}));
           });
         }
       });
     },
-    [dispatch, getPlanGroupList]
+    [dispatch, getTodoGroupList]
   );
 
   /** 监听编辑分组 */
-  const onEditPlanGroup = useCallback(() => {
-    const planDetail = findObjectById(plans, currentPlanId);
-    editGroupForm.setFieldValue('groupName', planDetail.title);
+  const onEditGroup = useCallback(() => {
+    const groupDetail = findObjectById(groups, currentGroupId);
+    editGroupForm.setFieldValue('groupName', groupDetail.title);
     setEditGroupOpened(true);
-  }, [currentPlanId, editGroupForm, plans]);
+  }, [currentGroupId, editGroupForm, groups]);
 
   /** 监听点击创建子分组 */
-  const onCreateSuPlanGroup = useCallback(() => {
+  const onCreateSubGroup = useCallback(() => {
     setCreateSubGroupOpened(true);
   }, []);
 
-  const getPlanMenuItem = useCallback(
+  const getGroupMenuItem = useCallback(
     (item) => {
       return getItem(
         <div
-          className={cx('plan-menu-item', {
-            'active-plan-menu-item': selectedKeys.indexOf(item.id) > -1,
-            'active-plan-menu-group-item':
+          className={cx('group-menu-item', {
+            'active-group-menu-item': selectedKeys.indexOf(item.id) > -1,
+            'active-group-menu-group-item':
               item?.children?.length && selectedKeys.indexOf(item.id) > -1
           })}
           key={item.id}
           onClick={() => onClickMenuItem(item.id)}
         >
-          <div className="plan-menu-name">{item.title}</div>
+          <div className="group-menu-name">{item.title}</div>
           <Dropdown
-            overlayClassName="plan-menu-dropdown-container"
+            overlayClassName="group-menu-dropdown-container"
             menu={{
               items: item?.children?.length
                 ? [
@@ -152,7 +152,7 @@ const PlanMenu: React.FC = () => {
                       <Button
                         type="text"
                         className="dropdown-action-name"
-                        onClick={onEditPlanGroup}
+                        onClick={onEditGroup}
                       >
                           编辑
                       </Button>
@@ -164,7 +164,7 @@ const PlanMenu: React.FC = () => {
                       <Button
                         type="text"
                         className="dropdown-action-name"
-                        onClick={onCreateSuPlanGroup}
+                        onClick={onCreateSubGroup}
                       >
                           创建
                       </Button>
@@ -178,7 +178,7 @@ const PlanMenu: React.FC = () => {
                       <Button
                         type="text"
                         className="dropdown-action-name"
-                        onClick={onEditPlanGroup}
+                        onClick={onEditGroup}
                       >
                           编辑
                       </Button>
@@ -190,7 +190,7 @@ const PlanMenu: React.FC = () => {
                       <Button
                         type="text"
                         className="dropdown-action-name"
-                        onClick={onCreateSuPlanGroup}
+                        onClick={onCreateSubGroup}
                       >
                           创建
                       </Button>
@@ -218,14 +218,14 @@ const PlanMenu: React.FC = () => {
         </div>,
         item.id.toString(),
         null,
-        item?.children?.length ? item.children.map(getPlanMenuItem) : undefined
+        item?.children?.length ? item.children.map(getGroupMenuItem) : undefined
       );
     },
     [
       onClickMenuItem,
-      onCreateSuPlanGroup,
+      onCreateSubGroup,
       onDeleteGroup,
-      onEditPlanGroup,
+      onEditGroup,
       selectedKeys
     ]
   );
@@ -245,15 +245,15 @@ const PlanMenu: React.FC = () => {
         [
           getItem(
             <div
-              className="plan-menu-item"
+              className="group-menu-item"
               key="-1"
               onClick={() => onClickMenuItem('-1')}
             >
-              <div className="plan-menu-name">近期待办</div>
+              <div className="group-menu-name">近期待办</div>
             </div>,
             '-1'
           ),
-          ...plans.map(getPlanMenuItem)
+          ...groups.map(getGroupMenuItem)
         ],
         'group'
       ),
@@ -265,11 +265,11 @@ const PlanMenu: React.FC = () => {
         [
           getItem(
             <div
-              className="plan-menu-item"
+              className="group-menu-item"
               key="-1"
               onClick={() => onClickMenuItem('-2')}
             >
-              <div className="plan-menu-name">废纸篓</div>
+              <div className="group-menu-name">废纸篓</div>
             </div>,
             '-2',
             <RestOutlined />
@@ -278,7 +278,7 @@ const PlanMenu: React.FC = () => {
         'group'
       )
     ];
-  }, [getPlanMenuItem, onClickCreateGroupBtn, onClickMenuItem, plans]);
+  }, [getGroupMenuItem, onClickCreateGroupBtn, onClickMenuItem, groups]);
 
   // 确认创建分组
   const onConfirmCreateGroup = throttle(
@@ -289,14 +289,14 @@ const PlanMenu: React.FC = () => {
         return;
       }
       window.api
-        .createPlanGroup({
+        .createTodoGroup({
           title: groupName
         })
         .then((res) => {
           if (res.changes === 1) {
             message.success('创建成功');
             onCancelCreateGroup();
-            getPlanGroupList();
+            getTodoGroupList();
           }
         });
     },
@@ -316,15 +316,15 @@ const PlanMenu: React.FC = () => {
         return;
       }
       window.api
-        .createPlanGroup({
+        .createTodoGroup({
           title: groupName,
-          parentId: currentPlanId
+          parentId: currentGroupId
         })
         .then((res) => {
           if (res.changes === 1) {
             message.success('创建成功');
             onCancelCreateSubGroup();
-            getPlanGroupList();
+            getTodoGroupList();
           }
         });
     },
@@ -335,7 +335,7 @@ const PlanMenu: React.FC = () => {
     }
   );
 
-  // 确认创建子分组
+  // 修改分组
   const onConfirmEditGroup = throttle(
     () => {
       const {groupName} = editGroupForm.getFieldsValue();
@@ -343,16 +343,18 @@ const PlanMenu: React.FC = () => {
         message.warning('请输入分组名称');
         return;
       }
+      const groupDetail = findObjectById(groups, currentGroupId);
       window.api
-        .updatePlanGroup({
+        .updateTodoGroup({
           title: groupName,
-          id: currentPlanId
+          id: currentGroupId,
+          parentId: groupDetail.parentId
         })
         .then((res) => {
           if (res.changes === 1) {
             message.success('修改成功');
             onCancelEditGroup();
-            getPlanGroupList();
+            getTodoGroupList();
           }
         });
     },
@@ -382,7 +384,7 @@ const PlanMenu: React.FC = () => {
   }, [editGroupForm]);
 
   return (
-    <div className="plan-menu-container" style={{width: 280}}>
+    <div className="group-menu-container" style={{width: 280}}>
       <Menu selectedKeys={selectedKeys} mode="inline" items={getMenuItems()} />
       <div className="divider"></div>
 
@@ -461,4 +463,4 @@ const PlanMenu: React.FC = () => {
   );
 };
 
-export default PlanMenu;
+export default GroupMenu;

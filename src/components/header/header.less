@@ -17,7 +17,16 @@
     border-bottom: none;
   }
 
-  .ant-menu-item-selected::after {
-    border: none !important;
+  .ant-menu-item:after {
+    bottom: -6px !important;
+    width: 40px;
+    left: 60% !important;
+    transform: translateX(-50%);
+  }
+
+  .ant-menu-item:not(.ant-menu-item-selected):hover {
+    &::after {
+      border: none !important;
+    }
   }
 }

@@ -1,4 +1,4 @@
-.plan-menu-container {
+.group-menu-container {
   border-right: 1px solid #f2f2f2;
   height: 100%;
   position: relative;
@@ -23,6 +23,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    user-select: none;
 
     .group-menu-add-btn {
       font-size: 16px;
@@ -32,13 +33,13 @@
     }
   }
 
-  .plan-menu-item {
+  .group-menu-item {
     padding-right: 20px;
     position: relative;
     user-select: none;
   }
 
-  .plan-menu-name {
+  .group-menu-name {
     font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
@@ -58,8 +59,8 @@
     display: none;
   }
 
-  .active-plan-menu-group-item {
-    .plan-menu-name {
+  .active-group-menu-group-item {
+    .group-menu-name {
       padding-right: 20px;
     }
     .menu-action-btn {
@@ -67,14 +68,14 @@
     }
   }
 
-  .active-plan-menu-item {
+  .active-group-menu-item {
     .menu-action-btn {
       display: block;
     }
   }
 }
 
-.plan-menu-dropdown-container {
+.group-menu-dropdown-container {
   .ant-dropdown-menu-item {
     padding: 0 !important;
   }

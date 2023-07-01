@@ -7,12 +7,12 @@ import {
   batchFinishTodo,
   batchRecoverTodo,
   batchRemoveGroup,
-  createPlanGroup,
-  deletePlanGroup,
-  getPlanGroupList,
+  createTodoGroup,
+  deleteTodoGroup,
   getTodoDetail,
-  updatePlanGroup,
-  updateTodoDetail
+  getTodoGroupList,
+  updateTodoDetail,
+  updateTodoGroup
 } from 'src/apis/todo.api';
 
 import {
@@ -43,7 +43,7 @@ const createWindow = (): void => {
     width: 800,
     icon: path.join(__dirname, './assets/logo.ico'),
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
     }
   });
@@ -95,8 +95,8 @@ app.on('ready', async () => {
 
   // 初始化的 sql 语句
   const initSql = `
-  -- 表：plans
-  CREATE TABLE IF NOT EXISTS plans (
+  -- groups
+  CREATE TABLE IF NOT EXISTS groups (
       id         INTEGER      PRIMARY KEY AUTOINCREMENT
                               UNIQUE
                               NOT NULL,
@@ -111,7 +111,7 @@ app.on('ready', async () => {
   CREATE TABLE IF NOT EXISTS todos (
       id         INTEGER      PRIMARY KEY AUTOINCREMENT,
       name       TEXT (40)    NOT NULL,
-      planId     INTEGER      NOT NULL,
+      groupId     INTEGER      NOT NULL,
       createTime INTEGER (13) NOT NULL,
       updateTime INTEGER (13) NOT NULL,
       deleteTime BLOB (13),
@@ -140,10 +140,10 @@ app.on('ready', async () => {
   ipcMain.handle('api:updateTodoDetail', apiWrapper(updateTodoDetail));
   ipcMain.handle('api:batchFinishTodo', apiWrapper(batchFinishTodo));
   ipcMain.handle('api:batchDeleteTodo', apiWrapper(batchDeleteTodo));
-  ipcMain.handle('api:createPlanGroup', apiWrapper(createPlanGroup));
-  ipcMain.handle('api:updatePlanGroup', apiWrapper(updatePlanGroup));
-  ipcMain.handle('api:deletePlanGroup', apiWrapper(deletePlanGroup));
-  ipcMain.handle('api:getPlanGroupList', apiWrapper(getPlanGroupList));
+  ipcMain.handle('api:createTodoGroup', apiWrapper(createTodoGroup));
+  ipcMain.handle('api:updateTodoGroup', apiWrapper(updateTodoGroup));
+  ipcMain.handle('api:deleteTodoGroup', apiWrapper(deleteTodoGroup));
+  ipcMain.handle('api:getTodoGroupList', apiWrapper(getTodoGroupList));
   ipcMain.handle('api:batchRecoverTodo', apiWrapper(batchRecoverTodo));
   ipcMain.handle('api:batchRemoveGroup', apiWrapper(batchRemoveGroup));
 

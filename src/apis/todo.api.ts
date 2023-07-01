@@ -4,7 +4,7 @@ export const defaultTodoProgress = 0;
 /** 创建待办事项 */
 export async function createTodo(db, event, params) {
   const insertStmt = db.prepare(
-    'INSERT INTO todos (name, planId, createTime, updateTime, priority, progress) VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO todos (name, groupId, createTime, updateTime, priority, progress) VALUES (?, ?, ?, ?, ?, ?)'
   );
   const name = params.name;
   const createTime = new Date().getTime();
@@ -13,7 +13,7 @@ export async function createTodo(db, event, params) {
   const progress = defaultTodoProgress;
   return insertStmt.run(
     name,
-    params.planId,
+    params.groupId,
     createTime,
     updateTime,
     priority,
@@ -24,18 +24,18 @@ export async function createTodo(db, event, params) {
 /** 获取待办列表 */
 export async function getTodoList(db, event, params) {
   // 废纸篓的数据
-  if (params.planId.toString() === '-2') {
+  if (params.groupId.toString() === '-2') {
     const query = db.prepare(
-      'select id, name, planId, createTime, updateTime, deleteTime, priority, progress from todos where deleteTime is not null'
+      'select id, name, groupId, createTime, updateTime, deleteTime, priority, progress from todos where deleteTime is not null'
     );
     return {
       result: query.all()
     };
   }
   const query = db.prepare(
-    'select id, name, planId, createTime, updateTime, deleteTime, priority, progress from todos where deleteTime is null and planId = ?'
+    'select id, name, groupId, createTime, updateTime, deleteTime, priority, progress from todos where deleteTime is null and groupId = ?'
   );
-  const result = query.all(params.planId);
+  const result = query.all(params.groupId);
   return {
     result
   };
@@ -128,45 +128,45 @@ export async function batchDeleteTodo(db, event, params) {
 
 /** 批量恢复待办事项 */
 export async function batchRecoverTodo(db, event, params) {
-  const cachedPlanIds: any = {};
+  const cachedGroupIds: any = {};
   const transaction = db.transaction(() => {
     for (const todoId of params.ids) {
       const getTodoDetailStatement = db.prepare(
-        'select name, id, planId, content from todos where id = ?'
+        'select name, id, groupId, content from todos where id = ?'
       );
       const todoDetail = getTodoDetailStatement.get(todoId);
 
-      const planId = todoDetail.planId;
+      const groupId = todoDetail.groupId;
 
-      const getPlanDetailStatement = db.prepare(
-        `select id, deleteTime from plans where id = ?`
+      const getGroupDetailStatement = db.prepare(
+        `select id, deleteTime from groups where id = ?`
       );
 
       const updateTodoStatement = db.prepare(
-        `update todos set deleteTime = null, planId = ? where id = ?`
+        `update todos set deleteTime = null, groupId = ? where id = ?`
       );
 
       // 分组未被删除
-      if (cachedPlanIds[planId] === 1) {
-        updateTodoStatement.run(planId, todoId);
+      if (cachedGroupIds[groupId] === 1) {
+        updateTodoStatement.run(groupId, todoId);
         return;
       }
 
       // 分组被删除
-      if (cachedPlanIds[planId] === 2) {
+      if (cachedGroupIds[groupId] === 2) {
         updateTodoStatement.run(-1, todoId);
       }
 
-      const planDetail = getPlanDetailStatement.get(planId);
+      const groupDetail = getGroupDetailStatement.get(groupId);
       // 分组未被删除
-      if (!planDetail.deleteTime) {
-        cachedPlanIds[todoDetail.planId] = 1;
-        updateTodoStatement.run(planId, todoId);
+      if (!groupDetail.deleteTime) {
+        cachedGroupIds[todoDetail.groupId] = 1;
+        updateTodoStatement.run(groupId, todoId);
         return;
       }
 
       // 分组已被删除
-      cachedPlanIds[todoDetail.planId] = 2;
+      cachedGroupIds[todoDetail.groupId] = 2;
       updateTodoStatement.run(-1, todoId);
     }
   });
@@ -174,9 +174,9 @@ export async function batchRecoverTodo(db, event, params) {
 }
 
 /** 新建分组 */
-export async function createPlanGroup(db, event, params) {
+export async function createTodoGroup(db, event, params) {
   const statement = db.prepare(
-    'insert into plans (title, parentId, createTime) values (?, ?, ?)'
+    'insert into groups (title, parentId, createTime) values (?, ?, ?)'
   );
   return statement.run(
     params.title,
@@ -186,9 +186,9 @@ export async function createPlanGroup(db, event, params) {
 }
 
 /** 修改分组 */
-export async function updatePlanGroup(db, event, params) {
+export async function updateTodoGroup(db, event, params) {
   const statement = db.prepare(
-    'update plans set title = @title, parentId = @parentId where id = @id'
+    'update groups set title = @title, parentId = @parentId where id = @id'
   );
   return statement.run({
     title: params.title,
@@ -198,12 +198,12 @@ export async function updatePlanGroup(db, event, params) {
 }
 
 /** 删除分组 */
-export async function deletePlanGroup(db, event, params) {
+export async function deleteTodoGroup(db, event, params) {
   const statement = db.prepare(
-    'update plans set deleteTime = @deleteTime where id = @id'
+    'update groups set deleteTime = @deleteTime where id = @id'
   );
   const statement2 = db.prepare(
-    'update todos set deleteTime = ? where planId = ? and deleteTime is null'
+    'update todos set deleteTime = ? where groupId = ? and deleteTime is null'
   );
 
   const deleteTime = new Date().getTime();
@@ -218,9 +218,9 @@ export async function deletePlanGroup(db, event, params) {
 }
 
 /** 获取分组 */
-export async function getPlanGroupList(db) {
+export async function getTodoGroupList(db) {
   const query = db.prepare(
-    'select id, title, parentId, createTime, deleteTime from plans where deleteTime is null'
+    'select id, title, parentId, createTime, deleteTime from groups where deleteTime is null'
   );
   const result = query.all();
   return {
@@ -232,8 +232,8 @@ export async function getPlanGroupList(db) {
 export async function batchRemoveGroup(db, event, params) {
   const transaction = db.transaction(() => {
     for (const id of params.ids) {
-      const statement = db.prepare('update todos set planId = ? where id = ?');
-      statement.run(params.planId, id);
+      const statement = db.prepare('update todos set groupId = ? where id = ?');
+      statement.run(params.groupId, id);
     }
   });
   return transaction();

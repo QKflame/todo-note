@@ -5,6 +5,7 @@ import Header from 'src/components/header/Header';
 import {useAppSelector} from 'src/hooks/store';
 import {translationsForLocale} from 'src/locales';
 
+import Note from './note/Note';
 import Todo from './todo/Todo';
 
 const App = memo(() => {
@@ -26,6 +27,7 @@ const App = memo(() => {
         <Routes>
           <Route path="/" element={<Todo />}></Route>
           <Route path="todo" element={<Todo />}></Route>
+          <Route path="note" element={<Note />}></Route>
         </Routes>
       </div>
     </IntlProvider>

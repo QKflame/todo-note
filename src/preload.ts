@@ -17,14 +17,14 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('api:batchFinishTodo', ...args),
   batchDeleteTodo: (...args) =>
     ipcRenderer.invoke('api:batchDeleteTodo', ...args),
-  createPlanGroup: (...args) =>
-    ipcRenderer.invoke('api:createPlanGroup', ...args),
-  updatePlanGroup: (...args) =>
-    ipcRenderer.invoke('api:updatePlanGroup', ...args),
-  deletePlanGroup: (...args) =>
-    ipcRenderer.invoke('api:deletePlanGroup', ...args),
-  getPlanGroupList: (...args) =>
-    ipcRenderer.invoke('api:getPlanGroupList', ...args),
+  createTodoGroup: (...args) =>
+    ipcRenderer.invoke('api:createTodoGroup', ...args),
+  updateTodoGroup: (...args) =>
+    ipcRenderer.invoke('api:updateTodoGroup', ...args),
+  deleteTodoGroup: (...args) =>
+    ipcRenderer.invoke('api:deleteTodoGroup', ...args),
+  getTodoGroupList: (...args) =>
+    ipcRenderer.invoke('api:getTodoGroupList', ...args),
   batchRecoverTodo: (...args) =>
     ipcRenderer.invoke('api:batchRecoverTodo', ...args),
   batchRemoveGroup: (...args) =>
