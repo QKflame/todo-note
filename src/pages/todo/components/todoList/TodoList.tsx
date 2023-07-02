@@ -76,7 +76,9 @@ const TodoList = () => {
   // 当前打开抽屉的 todo
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
 
-  const currentGroupId = useAppSelector((state) => state.group.currentGroupId);
+  const currentTodoGroupId = useAppSelector(
+    (state) => state.group.currentTodoGroupId
+  );
 
   const dispatch = useAppDispatch();
 
@@ -120,8 +122,8 @@ const TodoList = () => {
   });
 
   const getTodoLists = useCallback(() => {
-    queryTodoLists({groupId: currentGroupId});
-  }, [currentGroupId, queryTodoLists]);
+    queryTodoLists({groupId: currentTodoGroupId});
+  }, [currentTodoGroupId, queryTodoLists]);
 
   useEffect(() => {
     getTodoLists();
@@ -603,7 +605,7 @@ const TodoList = () => {
       window.api
         .createTodo({
           name: e.target.value,
-          groupId: currentGroupId
+          groupId: currentTodoGroupId
         })
         .then((res) => {
           if (res.changes) {
@@ -614,12 +616,12 @@ const TodoList = () => {
         });
       e.target.value = '';
     },
-    [currentGroupId, getTodoLists]
+    [currentTodoGroupId, getTodoLists]
   );
 
   useEffect(() => {
     setSelectedRowKeys([]);
-  }, [currentGroupId]);
+  }, [currentTodoGroupId]);
 
   // const onOnlyShowUnfinishedCheckboxChange = useCallback(() => {
   //   dispatch(toggleOnlyShowUnfinishedChecked());
@@ -668,11 +670,11 @@ const TodoList = () => {
     setBatchRemoveOpened(false);
   }, []);
 
-  const groups = useAppSelector((state) => state.group.groups);
+  const groups = useAppSelector((state) => state.group.todoGroups);
 
   const groupList = useMemo(() => {
-    return convertGroupList(groups, currentGroupId);
-  }, [currentGroupId, groups]);
+    return convertGroupList(groups, currentTodoGroupId);
+  }, [currentTodoGroupId, groups]);
 
   const onRemoveGroupChange = useCallback((newValue: string) => {
     setRemoveGroup(newValue);

@@ -16,7 +16,8 @@ import cx from 'classnames';
 import {isNull, throttle} from 'lodash';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
-import {setCurrentGroupId, setGroups} from 'src/store/group';
+import usePageType from 'src/hooks/usePageType';
+import {setCurrentTodoGroupId, setTodoGroups} from 'src/store/group';
 import {buildTree, findObjectById} from 'src/utils/util';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -38,11 +39,18 @@ function getItem(
 }
 
 const GroupMenu: React.FC = () => {
-  const currentGroupId = useAppSelector((state) => state.group.currentGroupId);
-  const groups = useAppSelector((state) => state.group.groups);
+  const currentTodoGroupId = useAppSelector(
+    (state) => state.group.currentTodoGroupId
+  );
+  const {isTodo, isNote} = usePageType();
+  const todoGroups = useAppSelector((state) => state.group.todoGroups);
+  const noteGroups = useAppSelector((state) => state.group.noteGroups);
+  const groups = isTodo ? todoGroups : noteGroups;
   const dispatch = useAppDispatch();
 
-  const [selectedKeys, setSelectedKeys] = useState([currentGroupId.toString()]);
+  const [selectedKeys, setSelectedKeys] = useState([
+    currentTodoGroupId.toString()
+  ]);
 
   const [createGroupOpened, setCreateGroupOpened] = useState(false);
   const [createSubGroupOpened, setCreateSubGroupOpened] = useState(false);
@@ -54,13 +62,13 @@ const GroupMenu: React.FC = () => {
 
   const onClickMenuItem = useCallback(
     (key) => {
-      if (key === currentGroupId) {
+      if (key === currentTodoGroupId) {
         return;
       }
-      dispatch(setCurrentGroupId({groupId: key}));
+      dispatch(setCurrentTodoGroupId({groupId: key}));
       setSelectedKeys([key.toString()]);
     },
-    [currentGroupId, dispatch]
+    [currentTodoGroupId, dispatch]
   );
 
   const getTodoGroupList = useCallback(() => {
@@ -75,7 +83,7 @@ const GroupMenu: React.FC = () => {
             };
           })
         );
-        dispatch(setGroups({groups: tree}));
+        dispatch(setTodoGroups({groups: tree}));
       }
     });
   }, [dispatch]);
@@ -108,7 +116,7 @@ const GroupMenu: React.FC = () => {
             message.success('删除成功');
             getTodoGroupList();
             setSelectedKeys(['-1']);
-            dispatch(setCurrentGroupId({groupId: '-1'}));
+            dispatch(setCurrentTodoGroupId({groupId: '-1'}));
           });
         }
       });
@@ -118,10 +126,10 @@ const GroupMenu: React.FC = () => {
 
   /** 监听编辑分组 */
   const onEditGroup = useCallback(() => {
-    const groupDetail = findObjectById(groups, currentGroupId);
+    const groupDetail = findObjectById(groups, currentTodoGroupId);
     editGroupForm.setFieldValue('groupName', groupDetail.title);
     setEditGroupOpened(true);
-  }, [currentGroupId, editGroupForm, groups]);
+  }, [currentTodoGroupId, editGroupForm, groups]);
 
   /** 监听点击创建子分组 */
   const onCreateSubGroup = useCallback(() => {
@@ -243,16 +251,29 @@ const GroupMenu: React.FC = () => {
         'personalGroup',
         null,
         [
-          getItem(
-            <div
-              className="group-menu-item"
-              key="-1"
-              onClick={() => onClickMenuItem('-1')}
-            >
-              <div className="group-menu-name">近期待办</div>
-            </div>,
-            '-1'
-          ),
+          isTodo
+            ? getItem(
+              <div
+                className="group-menu-item"
+                key="-1"
+                onClick={() => onClickMenuItem('-1')}
+              >
+                <div className="group-menu-name">近期待办</div>
+              </div>,
+              '-1'
+            )
+            : isNote
+              ? getItem(
+                <div
+                  className="group-menu-item"
+                  key="-3"
+                  onClick={() => onClickMenuItem('-3')}
+                >
+                  <div className="group-menu-name">随手笔记</div>
+                </div>,
+                '-3'
+              )
+              : undefined,
           ...groups.map(getGroupMenuItem)
         ],
         'group'
@@ -263,22 +284,43 @@ const GroupMenu: React.FC = () => {
         'systemGroup',
         null,
         [
-          getItem(
-            <div
-              className="group-menu-item"
-              key="-1"
-              onClick={() => onClickMenuItem('-2')}
-            >
-              <div className="group-menu-name">废纸篓</div>
-            </div>,
-            '-2',
-            <RestOutlined />
-          )
+          isTodo
+            ? getItem(
+              <div
+                className="group-menu-item"
+                key="-2"
+                onClick={() => onClickMenuItem('-2')}
+              >
+                <div className="group-menu-name">废纸篓</div>
+              </div>,
+              '-2',
+              <RestOutlined />
+            )
+            : isNote
+              ? getItem(
+                <div
+                  className="group-menu-item"
+                  key="-4"
+                  onClick={() => onClickMenuItem('-4')}
+                >
+                  <div className="group-menu-name">废纸篓</div>
+                </div>,
+                '-4',
+                <RestOutlined />
+              )
+              : undefined
         ],
         'group'
       )
     ];
-  }, [getGroupMenuItem, onClickCreateGroupBtn, onClickMenuItem, groups]);
+  }, [
+    onClickCreateGroupBtn,
+    isTodo,
+    isNote,
+    groups,
+    getGroupMenuItem,
+    onClickMenuItem
+  ]);
 
   // 确认创建分组
   const onConfirmCreateGroup = throttle(
@@ -318,7 +360,7 @@ const GroupMenu: React.FC = () => {
       window.api
         .createTodoGroup({
           title: groupName,
-          parentId: currentGroupId
+          parentId: currentTodoGroupId
         })
         .then((res) => {
           if (res.changes === 1) {
@@ -343,11 +385,11 @@ const GroupMenu: React.FC = () => {
         message.warning('请输入分组名称');
         return;
       }
-      const groupDetail = findObjectById(groups, currentGroupId);
+      const groupDetail = findObjectById(groups, currentTodoGroupId);
       window.api
         .updateTodoGroup({
           title: groupName,
-          id: currentGroupId,
+          id: currentTodoGroupId,
           parentId: groupDetail.parentId
         })
         .then((res) => {

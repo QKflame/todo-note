@@ -2,29 +2,35 @@ import {createSelector, createSlice} from '@reduxjs/toolkit';
 
 interface GroupState {
   // 当前选中的计划ID
-  currentGroupId: string;
-  // 计划列表
-  groups: Array<{
+  currentTodoGroupId: string;
+  // 待办列表
+  todoGroups: Array<{
+    id: number;
+    title: string;
+  }>;
+  // 笔记列表
+  noteGroups: Array<{
     id: number;
     title: string;
   }>;
 }
 
 const initialState: GroupState = {
-  currentGroupId: localStorage.getItem('CURRENT_GROUP_ID') || 'recent',
-  groups: []
+  currentTodoGroupId: localStorage.getItem('CURRENT_GROUP_ID') || 'recent',
+  todoGroups: [],
+  noteGroups: []
 };
 
 const groupSlice = createSlice({
   name: 'group',
   initialState,
   reducers: {
-    setCurrentGroupId(state, {payload}) {
+    setCurrentTodoGroupId(state, {payload}) {
       localStorage.setItem('CURRENT_GROUP_ID', payload.groupId);
-      state.currentGroupId = payload.groupId;
+      state.currentTodoGroupId = payload.groupId;
     },
-    setGroups(state, {payload}) {
-      state.groups = payload.groups;
+    setTodoGroups(state, {payload}) {
+      state.todoGroups = payload.groups;
     }
   }
 });
@@ -33,9 +39,9 @@ const group = (state) => state.group;
 
 const isTrashSelector = createSelector(
   group,
-  (_) => _.currentGroupId.toString() === '-2'
+  (_) => _.currentTodoGroupId.toString() === '-2'
 );
 
-export const {setCurrentGroupId, setGroups} = groupSlice.actions;
+export const {setCurrentTodoGroupId, setTodoGroups} = groupSlice.actions;
 export {isTrashSelector};
 export default groupSlice.reducer;
