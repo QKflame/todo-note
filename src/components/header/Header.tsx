@@ -15,12 +15,12 @@ const menuItems: MenuProps['items'] = [
     label: '我的待办',
     key: 'todo',
     icon: <CarryOutOutlined />
-  },
-  {
-    label: '我的笔记',
-    key: 'note',
-    icon: <ReadOutlined />
   }
+  // {
+  //   label: '我的笔记',
+  //   key: 'note',
+  //   icon: <ReadOutlined />
+  // }
 ];
 
 const Header = () => {

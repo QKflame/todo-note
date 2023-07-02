@@ -25,6 +25,10 @@ interface TodoDrawerProps {
   open: boolean;
   onClose: () => void;
   onSaveSuccess?: () => void;
+  /** 向左切换 */
+  onSwitchLeft?: () => void;
+  /** 向右切换 */
+  onSwitchRight?: () => void;
 }
 
 const TodoEditor = forwardRef((props, ref) => {
@@ -220,11 +224,15 @@ const TodoDrawer = (props: TodoDrawerProps) => {
           }}
         >
           <div>
-            <Button
+            {/* <Button
               icon={<LeftOutlined />}
               style={{marginRight: 10}}
+              onClick={props.onSwitchLeft}
             ></Button>
-            <Button icon={<RightOutlined />}></Button>
+            <Button
+              icon={<RightOutlined />}
+              onClick={props.onSwitchRight}
+            ></Button> */}
           </div>
           <Button type="primary" onClick={onClickConfirmBtn}>
             保存

@@ -684,6 +684,29 @@ const TodoList = () => {
     return treeNode?.title?.includes(inputValue);
   }, []);
 
+  const handleSwitchLeft = useCallback(() => {
+    const currentTodoId = todoDetail.id;
+    const index = filteredDatasource.findIndex(
+      (item) => item.id === currentTodoId
+    );
+    let targetTodoId = -1;
+    const length = filteredDatasource.length;
+    if (index === 0) {
+      targetTodoId = filteredDatasource[length - 1].id;
+    } else if (index === length - 1) {
+      targetTodoId = filteredDatasource[0].id;
+    } else {
+      targetTodoId = filteredDatasource[index - 1].id;
+    }
+    window.api.getTodoDetail({id: targetTodoId}).then((res) => {
+      dispatch(setTodoDetail(res));
+    });
+  }, [dispatch, filteredDatasource, todoDetail.id]);
+
+  const handleSwitchRight = useCallback(() => {
+    console.log('点击向右切换按钮');
+  }, []);
+
   return (
     <div className="todo-list">
       <div className="action-bar-wrapper">
@@ -776,6 +799,8 @@ const TodoList = () => {
         open={isTodoDrawerOpened}
         onClose={onTodoDrawerClose}
         onSaveSuccess={onSaveSuccess}
+        onSwitchLeft={handleSwitchLeft}
+        onSwitchRight={handleSwitchRight}
       ></TodoDrawer>
 
       <Modal
