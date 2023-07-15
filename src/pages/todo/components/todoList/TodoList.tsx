@@ -3,16 +3,16 @@ import './todoList.less';
 import {
   AlertOutlined,
   CheckCircleFilled,
-  CheckCircleOutlined,
   ClockCircleOutlined,
   CoffeeOutlined,
+  FieldTimeOutlined,
   RocketOutlined
 } from '@ant-design/icons';
 import {useRequest} from 'ahooks';
 import {
   Alert,
   Button,
-  Checkbox,
+  DatePicker,
   Form,
   Input,
   message,
@@ -23,10 +23,10 @@ import {
   Slider,
   Table,
   Tag,
-  Tree,
   TreeSelect
 } from 'antd';
 import type {ColumnsType} from 'antd/es/table';
+import dayjs from 'dayjs';
 import {cloneDeep, debounce, orderBy, throttle} from 'lodash';
 import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
@@ -34,15 +34,14 @@ import {isTrashSelector} from 'src/store/group';
 import {
   resetTodoDetail,
   setTodoDetail,
-  toggleIsTodoDrawerOpened,
-  toggleOnlyShowHighPriorityChecked,
-  toggleOnlyShowUnfinishedChecked
+  toggleIsTodoDrawerOpened
 } from 'src/store/todos';
 import {TodoItem} from 'src/types';
 import {
   convertGroupList,
   convertTimestampToDuration,
-  formatTimestamp
+  formatTimestamp,
+  formatTodoDeadline
 } from 'src/utils/util';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
@@ -94,7 +93,7 @@ const TodoList = () => {
 
   // 监听点击 title
   const onClickTitle = useCallback(
-    (row: any) => {
+    (row: TodoItem) => {
       if (isTrash) {
         return;
       }
@@ -112,7 +111,7 @@ const TodoList = () => {
     dispatch(resetTodoDetail());
   }, [dispatch]);
 
-  const {run: queryTodoLists} = useRequest(window.api.getTodoList, {
+  const {run: queryTodoList} = useRequest(window.api.getTodoList, {
     manual: true,
     onSuccess: (res: any) => {
       if (res?.result) {
@@ -121,17 +120,17 @@ const TodoList = () => {
     }
   });
 
-  const getTodoLists = useCallback(() => {
-    queryTodoLists({groupId: currentTodoGroupId});
-  }, [currentTodoGroupId, queryTodoLists]);
+  const getTodoList = useCallback(() => {
+    queryTodoList({groupId: currentTodoGroupId});
+  }, [currentTodoGroupId, queryTodoList]);
 
   useEffect(() => {
-    getTodoLists();
-  }, [getTodoLists]);
+    getTodoList();
+  }, [getTodoList]);
 
   const onSaveSuccess = useCallback(() => {
-    getTodoLists();
-  }, [getTodoLists]);
+    getTodoList();
+  }, [getTodoList]);
 
   const filteredDatasource = useMemo(() => {
     let arr = datasource;
@@ -160,21 +159,48 @@ const TodoList = () => {
     (id: number, value: number) => {
       window.api.updateTodoPriority({id, priority: value}).then((res) => {
         if (res.changes === 1) {
-          getTodoLists();
+          getTodoList();
         }
       });
     },
-    [getTodoLists]
+    [getTodoList]
   );
 
   // 监听进度发生变化
   const onProgressChange = debounce((value: number, id: number) => {
     window.api.updateTodoProgress({id, progress: value}).then((res) => {
       if (res.changes === 1) {
-        getTodoLists();
+        getTodoList();
       }
     });
   }, 500);
+
+  // 监听确认选择截止时间
+  const onConfirmSelectDeadline = useCallback(
+    (e, id) => {
+      const timestamp = new Date(e.$d).getTime();
+      window.api.updateTodoDeadline({id, deadline: timestamp}).then((res) => {
+        if (res.changes === 1) {
+          getTodoList();
+        }
+      });
+    },
+    [getTodoList]
+  );
+
+  // 监听  deadline 发生变化
+  const onDeadlineChange = useCallback(
+    (e, id) => {
+      if (e === null) {
+        window.api.updateTodoDeadline({id, deadline: null}).then((res) => {
+          if (res.changes === 1) {
+            getTodoList();
+          }
+        });
+      }
+    },
+    [getTodoList]
+  );
 
   const columns: ColumnsType<TodoItem> = useMemo(
     () => [
@@ -369,6 +395,46 @@ const TodoList = () => {
         }
       },
       {
+        title: '截止时间',
+        dataIndex: 'deadline',
+        width: '60px',
+        render: (value, item: TodoItem) => {
+          return isTrash ? (
+            <div style={{fontSize: 12, color: 'gray', display: 'inline'}}>
+              <FieldTimeOutlined />
+              <span style={{marginLeft: '6px'}}>
+                {formatTodoDeadline(value)}
+              </span>
+            </div>
+          ) : (
+            <Popover
+              content={
+                <DatePicker
+                  {...(value
+                    ? {
+                      defaultValue: dayjs(value)
+                    }
+                    : {})}
+                  placeholder="请选择截止时间"
+                  showTime
+                  onOk={(v) => onConfirmSelectDeadline(v, item.id)}
+                  onChange={(v) => onDeadlineChange(v, item.id)}
+                />
+              }
+              title="截止时间"
+              trigger="hover"
+            >
+              <div style={{fontSize: 12, color: 'gray', display: 'inline'}}>
+                <FieldTimeOutlined />
+                <span style={{marginLeft: '6px'}}>
+                  {formatTodoDeadline(value)}
+                </span>
+              </div>
+            </Popover>
+          );
+        }
+      },
+      {
         title: '创建时间',
         dataIndex: 'createTime',
         width: '60px',
@@ -448,6 +514,7 @@ const TodoList = () => {
       filteredDatasource,
       isTrash,
       onClickTitle,
+      onConfirmSelectDeadline,
       onPriorityChange,
       onProgressChange
     ]
@@ -470,7 +537,7 @@ const TodoList = () => {
           window.api.batchFinishTodo({ids: selectedRowKeys}).then(() => {
             message.success('操作成功');
             setSelectedRowKeys([]);
-            getTodoLists();
+            getTodoList();
           });
         }
       });
@@ -527,7 +594,7 @@ const TodoList = () => {
               .then(() => {
                 message.success('删除成功');
                 setSelectedRowKeys([]);
-                getTodoLists();
+                getTodoList();
               });
           }
         });
@@ -549,7 +616,7 @@ const TodoList = () => {
           window.api.batchDeleteTodo({ids: selectedRowKeys}).then(() => {
             message.success('删除成功');
             setSelectedRowKeys([]);
-            getTodoLists();
+            getTodoList();
           });
         }
       });
@@ -588,7 +655,7 @@ const TodoList = () => {
           window.api.batchRecoverTodo({ids: selectedRowKeys}).then(() => {
             message.success('恢复成功');
             setSelectedRowKeys([]);
-            getTodoLists();
+            getTodoList();
           });
         }
       });
@@ -602,34 +669,29 @@ const TodoList = () => {
 
   const onCreateTodo = useCallback(
     (e) => {
+      if (!e?.target?.value?.trim?.()) {
+        return;
+      }
       window.api
         .createTodo({
-          name: e.target.value,
+          name: e.target.value.trim(),
           groupId: currentTodoGroupId
         })
         .then((res) => {
           if (res.changes) {
             message.success('创建成功');
-            getTodoLists();
+            getTodoList();
             setTodoName('');
           }
         });
       e.target.value = '';
     },
-    [currentTodoGroupId, getTodoLists]
+    [currentTodoGroupId, getTodoList]
   );
 
   useEffect(() => {
     setSelectedRowKeys([]);
   }, [currentTodoGroupId]);
-
-  // const onOnlyShowUnfinishedCheckboxChange = useCallback(() => {
-  //   dispatch(toggleOnlyShowUnfinishedChecked());
-  // }, [dispatch]);
-
-  // const onOnlyShowHighPriorityCheckboxChange = useCallback(() => {
-  //   dispatch(toggleOnlyShowHighPriorityChecked());
-  // }, [dispatch]);
 
   const onTodoNameChange = useCallback((e) => {
     setTodoName(e.target.value);
@@ -638,31 +700,28 @@ const TodoList = () => {
   const [removeGroup, setRemoveGroup] = useState<string>();
 
   /** 监听点击确认批量移动按钮 */
-  const onConfirmBatchRemove = useCallback(
-    throttle(
-      () => {
-        if (!removeGroup) {
-          message.warning('请选择移动分组');
-          return;
-        }
-
-        window.api
-          .batchRemoveGroup({ids: selectedRowKeys, groupId: removeGroup})
-          .then((res) => {
-            setRemoveGroup('');
-            batchRemoveForm.resetFields();
-            message.success('移动成功');
-            onCancelBatchRemove();
-            getTodoLists();
-          });
-      },
-      3000,
-      {
-        leading: true,
-        trailing: false
+  const onConfirmBatchRemove = throttle(
+    () => {
+      if (!removeGroup) {
+        message.warning('请选择移动分组');
+        return;
       }
-    ),
-    [removeGroup]
+
+      window.api
+        .batchRemoveGroup({ids: selectedRowKeys, groupId: removeGroup})
+        .then(() => {
+          setRemoveGroup('');
+          batchRemoveForm.resetFields();
+          message.success('移动成功');
+          onCancelBatchRemove();
+          getTodoList();
+        });
+    },
+    3000,
+    {
+      leading: true,
+      trailing: false
+    }
   );
 
   /** 监听点击取消批量移动按钮 */
@@ -703,9 +762,7 @@ const TodoList = () => {
     });
   }, [dispatch, filteredDatasource, todoDetail.id]);
 
-  const handleSwitchRight = useCallback(() => {
-    console.log('点击向右切换按钮');
-  }, []);
+  const handleSwitchRight = useCallback(() => {}, []);
 
   return (
     <div className="todo-list">
@@ -723,21 +780,6 @@ const TodoList = () => {
           </div>
         )}
         <div className="right-actions-wrapper">
-          {/* <Checkbox
-            checked={onlyShowUnfinishedChecked}
-            onChange={onOnlyShowUnfinishedCheckboxChange}
-          >
-            未完成
-          </Checkbox>
-          <Checkbox
-            checked={onlyShowHighPriorityChecked}
-            onChange={onOnlyShowHighPriorityCheckboxChange}
-          >
-            高优先级
-          </Checkbox> */}
-          {/* <Button type="primary" onClick={onClickBtn} className="ml-10">
-            批量设置
-          </Button> */}
           {!isTrash && (
             <Button
               type="primary"

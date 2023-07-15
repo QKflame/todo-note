@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('api:updateTodoPriority', ...args),
   updateTodoProgress: (...args) =>
     ipcRenderer.invoke('api:updateTodoProgress', ...args),
+  updateTodoDeadline: (...args) =>
+    ipcRenderer.invoke('api:updateTodoDeadline', ...args),
   getTodoDetail: (...args) => ipcRenderer.invoke('api:getTodoDetail', ...args),
   updateTodoDetail: (...args) =>
     ipcRenderer.invoke('api:updateTodoDetail', ...args),

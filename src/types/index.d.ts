@@ -27,6 +27,7 @@ export declare global {
       getTodoList: AsyncFunction<{ result: Array<any> }>;
       updateTodoPriority: AsyncFunction<any>;
       updateTodoProgress: AsyncFunction<any>;
+      updateTodoDeadline: AsyncFunction<any>;
       getTodoDetail: AsyncFunction<any>;
       updateTodoDetail: AsyncFunction<any>;
       batchFinishTodo: AsyncFunction<any>;

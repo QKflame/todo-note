@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import React from 'react';
 
 export const convertTimestampToDuration = (timestamp: number) => {
   const monthDiff = dayjs().diff(dayjs(timestamp), 'month');
@@ -8,23 +9,23 @@ export const convertTimestampToDuration = (timestamp: number) => {
 
   const weekDiff = dayjs().diff(dayjs(timestamp), 'week');
   if (weekDiff > 0) {
-    return `${weekDiff}周前`;
+    return `${weekDiff} 周前`;
   }
 
   const dayDiff = dayjs().diff(dayjs(timestamp), 'day');
 
   if (dayDiff > 0) {
-    return `${dayDiff}天前`;
+    return `${dayDiff} 天前`;
   }
 
   const hourDiff = dayjs().diff(dayjs(timestamp), 'hour');
   if (hourDiff > 0) {
-    return `${hourDiff}小时前`;
+    return `${hourDiff} 小时前`;
   }
 
   const minuteDiff = dayjs().diff(dayjs(timestamp), 'minute');
   if (minuteDiff > 0) {
-    return `${minuteDiff}分钟前`;
+    return `${minuteDiff} 分钟前`;
   }
 
   return '刚刚';
@@ -91,4 +92,34 @@ export function convertGroupList(groups, currentGroupId) {
     ...('-1' === currentGroupId ? {disabled: true} : {})
   });
   return _groups;
+}
+
+// 格式化截止时间
+export function formatTodoDeadline(timestamp: null | number) {
+  if (!timestamp) {
+    return '未设置';
+  }
+  const currentTimestamp = Date.now();
+  const difference = timestamp - currentTimestamp;
+
+  if (difference > 0) {
+    const remainingDays = Math.floor(difference / (1000 * 60 * 60 * 24));
+    if (remainingDays >= 1) {
+      return <span style={{color: '#1677ff'}}>剩余 {remainingDays} 天</span>;
+    }
+
+    const remainingHours = Math.floor(difference / (1000 * 60 * 60));
+    if (remainingHours >= 1) {
+      return (
+        <span style={{color: '#fa8c16'}}>剩余 {remainingHours} 小时</span>
+      );
+    }
+
+    const remainingMinutes = Math.floor(difference / (1000 * 60));
+    return (
+      <span style={{color: '#fa8c16'}}>剩余 {remainingMinutes} 分钟</span>
+    );
+  }
+  const expiredDays = Math.ceil(Math.abs(difference) / (1000 * 60 * 60 * 24));
+  return <span style={{color: '#f5222d'}}>过期 {expiredDays} 天</span>;
 }

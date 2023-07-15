@@ -26,14 +26,14 @@ export async function getTodoList(db, event, params) {
   // 废纸篓的数据
   if (params.groupId.toString() === '-2') {
     const query = db.prepare(
-      'select id, name, groupId, createTime, updateTime, deleteTime, priority, progress from todos where deleteTime is not null'
+      'select id, name, groupId, createTime, updateTime, deleteTime, priority, progress, deadline from todos where deleteTime is not null'
     );
     return {
       result: query.all()
     };
   }
   const query = db.prepare(
-    'select id, name, groupId, createTime, updateTime, deleteTime, priority, progress from todos where deleteTime is null and groupId = ?'
+    'select id, name, groupId, createTime, updateTime, deleteTime, priority, progress, deadline from todos where deleteTime is null and groupId = ?'
   );
   const result = query.all(params.groupId);
   return {
@@ -55,6 +55,14 @@ export async function updateTodoProgress(db, event, params) {
     'update todos set progress = ?, updateTime = ? where id = ?'
   );
   return updateStatement.run(params.progress, new Date().getTime(), params.id);
+}
+
+/** 修改 todo 的截止时间 */
+export async function updateTodoDeadline(db, event, params) {
+  const updateStatement = db.prepare(
+    'update todos set deadline = ?, updateTime = ? where id = ?'
+  );
+  return updateStatement.run(params.deadline, new Date().getTime(), params.id);
 }
 
 /** 获取 todo 的详细信息 */

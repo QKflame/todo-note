@@ -11,6 +11,7 @@ import {
   deleteTodoGroup,
   getTodoDetail,
   getTodoGroupList,
+  updateTodoDeadline,
   updateTodoDetail,
   updateTodoGroup
 } from 'src/apis/todo.api';
@@ -136,6 +137,7 @@ app.on('ready', async () => {
   ipcMain.handle('api:createTodo', apiWrapper(createTodo));
   ipcMain.handle('api:updateTodoPriority', apiWrapper(updateTodoPriority));
   ipcMain.handle('api:updateTodoProgress', apiWrapper(updateTodoProgress));
+  ipcMain.handle('api:updateTodoDeadline', apiWrapper(updateTodoDeadline));
   ipcMain.handle('api:getTodoDetail', apiWrapper(getTodoDetail));
   ipcMain.handle('api:updateTodoDetail', apiWrapper(updateTodoDetail));
   ipcMain.handle('api:batchFinishTodo', apiWrapper(batchFinishTodo));
