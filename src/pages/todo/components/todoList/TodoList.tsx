@@ -427,7 +427,7 @@ const TodoList = () => {
               <div style={{fontSize: 12, color: 'gray', display: 'inline'}}>
                 <FieldTimeOutlined />
                 <span style={{marginLeft: '6px'}}>
-                  {formatTodoDeadline(value)}
+                  {item.progress === 100 ? '已完成' : formatTodoDeadline(value)}
                 </span>
               </div>
             </Popover>
@@ -515,6 +515,7 @@ const TodoList = () => {
       isTrash,
       onClickTitle,
       onConfirmSelectDeadline,
+      onDeadlineChange,
       onPriorityChange,
       onProgressChange
     ]

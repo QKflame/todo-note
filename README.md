@@ -12,6 +12,13 @@
 yarn start
 ```
 
+# 执行构建
+
+```shell
+export ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/"
+yarn make
+```
+
 # 待办事项
 
 - [x] 增加 prettier 配置，增加代码自动格式化
