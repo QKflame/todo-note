@@ -1,6 +1,11 @@
 import './groupMenu.less';
 
-import {HolderOutlined, PlusOutlined, RestOutlined} from '@ant-design/icons';
+import {
+  EllipsisOutlined,
+  HolderOutlined,
+  PlusOutlined,
+  RestOutlined
+} from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -221,7 +226,8 @@ const GroupMenu: React.FC = () => {
             placement="bottom"
             arrow={{pointAtCenter: true}}
           >
-            <HolderOutlined className="menu-action-btn" />
+            {/* <HolderOutlined className="menu-action-btn" /> */}
+            <EllipsisOutlined className="menu-action-btn" />
           </Dropdown>
         </div>,
         item.id.toString(),
@@ -241,7 +247,7 @@ const GroupMenu: React.FC = () => {
   const getMenuItems = useCallback(() => {
     return [
       getItem(
-        <div className="group-menu-container">
+        <div className="group-container">
           <div className="">个人分组</div>
           <PlusOutlined
             className="group-menu-add-btn"

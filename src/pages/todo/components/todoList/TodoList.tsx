@@ -3,9 +3,13 @@ import './todoList.less';
 import {
   AlertOutlined,
   CheckCircleFilled,
+  CheckOutlined,
+  CheckSquareOutlined,
+  ClearOutlined,
   ClockCircleOutlined,
   CoffeeOutlined,
   FieldTimeOutlined,
+  RetweetOutlined,
   RocketOutlined
 } from '@ant-design/icons';
 import {useRequest} from 'ahooks';
@@ -786,6 +790,7 @@ const TodoList = () => {
               type="primary"
               onClick={onClickBatchRemove}
               className="ml-10"
+              icon={<RetweetOutlined />}
             >
               批量移动
             </Button>
@@ -795,6 +800,7 @@ const TodoList = () => {
               type="primary"
               onClick={onClickBatchFinish}
               className="ml-10"
+              icon={<CheckOutlined />}
             >
               批量完成
             </Button>
@@ -808,7 +814,12 @@ const TodoList = () => {
               批量恢复
             </Button>
           )}
-          <Button danger onClick={onClickBatchDelete} className="ml-10">
+          <Button
+            danger
+            onClick={onClickBatchDelete}
+            className="ml-10"
+            icon={<ClearOutlined />}
+          >
             批量删除
           </Button>
         </div>

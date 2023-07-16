@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain} from 'electron';
+import {app, BrowserWindow, ipcMain, shell} from 'electron';
 // import log from 'electron-log';
 import fs from 'fs';
 import path from 'path';
@@ -47,6 +47,11 @@ const createWindow = (): void => {
       devTools: process.env.NODE_ENV === 'development',
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
     }
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({url}) => {
+    shell.openExternal(url);
+    return {action: 'deny'};
   });
 
   // log.info(

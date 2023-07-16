@@ -1,7 +1,6 @@
 import './todoDrawer.less';
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
-import {LeftOutlined, RightOutlined} from '@ant-design/icons';
 import {IDomEditor, IEditorConfig, IToolbarConfig} from '@wangeditor/editor';
 import {Editor, Toolbar} from '@wangeditor/editor-for-react';
 import {Button, Drawer, DrawerProps, Input, notification} from 'antd';

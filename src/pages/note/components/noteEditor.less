@@ -1,0 +1,48 @@
+.note-editor-container {
+  flex-grow: 1;
+  padding: 10px 20px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  .note-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .note-title {
+    font-size: 18px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .toolbar {
+    border-bottom: 1px solid #f2f2f2;
+  }
+
+  .w-e-bar-divider {
+    width: 0;
+  }
+
+  .editor {
+    flex-grow: 1;
+    overflow: auto;
+    box-sizing: border-box;
+
+    .w-e-text-container [data-slate-editor] {
+      min-height: 0;
+    }
+
+    .w-e-scroll {
+      overflow: auto !important;
+    }
+  }
+}
+
+.note-page {
+  .w-e-full-screen-container {
+    padding-top: 60px !important;
+  }
+}
