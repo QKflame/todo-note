@@ -1,4 +1,4 @@
-export type AsyncFunction<T> = (...args: any[]) => Promise<T>;
+export type ApiFunction<Params, Result> = (...args: Params) => Promise<Result>;
 
 export interface TodoItem {
   /** 待办 ID */
@@ -20,24 +20,24 @@ export interface TodoItem {
 export declare global {
   interface Window {
     api: {
-      createTodo: AsyncFunction<{
-        changes: number;
-        lastInsertRowid: number;
-      }>;
-      getTodoList: AsyncFunction<{ result: Array<any> }>;
-      updateTodoPriority: AsyncFunction<any>;
-      updateTodoProgress: AsyncFunction<any>;
-      updateTodoDeadline: AsyncFunction<any>;
-      getTodoDetail: AsyncFunction<any>;
-      updateTodoDetail: AsyncFunction<any>;
-      batchFinishTodo: AsyncFunction<any>;
-      batchDeleteTodo: AsyncFunction<any>;
-      createTodoGroup: AsyncFunction<any>;
-      updateTodoGroup: AsyncFunction<any>;
-      deleteTodoGroup: AsyncFunction<any>;
-      getTodoGroupList: AsyncFunction<any>;
-      batchRecoverTodo: AsyncFunction<any>;
-      batchRemoveGroup: AsyncFunction<any>;
+      createTodo: ApiFunction;
+      getTodoList: ApiFunction;
+      updateTodoPriority: ApiFunction;
+      updateTodoProgress: ApiFunction;
+      updateTodoDeadline: ApiFunction;
+      getTodoDetail: ApiFunction;
+      updateTodoDetail: ApiFunction;
+      batchFinishTodo: ApiFunction;
+      batchDeleteTodo: ApiFunction;
+      createTodoGroup: ApiFunction;
+      updateTodoGroup: ApiFunction;
+      deleteTodoGroup: ApiFunction;
+      getTodoGroupList: ApiFunction;
+      getNoteGroupList: ApiFunction;
+      batchRecoverTodo: ApiFunction;
+      batchRemoveGroup: ApiFunction;
+      createNoteGroup: ApiFunction;
+      updateNoteGroup: ApiFunction;
     };
   }
 }

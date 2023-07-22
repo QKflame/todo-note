@@ -1,0 +1,20 @@
+export const apiDefinitions = [
+  'createTodo',
+  'getTodoList',
+  'updateTodoPriority',
+  'updateTodoProgress',
+  'updateTodoDeadline',
+  'getTodoDetail',
+  'updateTodoDetail',
+  'batchFinishTodo',
+  'batchDeleteTodo',
+  'batchRecoverTodo',
+  'createTodoGroup',
+  'updateTodoGroup',
+  'deleteTodoGroup',
+  'getTodoGroupList',
+  'batchRemoveGroup',
+  'getNoteGroupList',
+  'createNoteGroup',
+  'updateNoteGroup'
+];

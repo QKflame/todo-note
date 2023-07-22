@@ -2,7 +2,6 @@ import './groupMenu.less';
 
 import {
   EllipsisOutlined,
-  HolderOutlined,
   PlusOutlined,
   RestOutlined
 } from '@ant-design/icons';
@@ -22,7 +21,12 @@ import {isNull, throttle} from 'lodash';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import usePageType from 'src/hooks/usePageType';
-import {setCurrentTodoGroupId, setTodoGroups} from 'src/store/group';
+import {
+  setCurrentNoteGroupId,
+  setCurrentTodoGroupId,
+  setNoteGroups,
+  setTodoGroups
+} from 'src/store/group';
 import {buildTree, findObjectById} from 'src/utils/util';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -47,6 +51,9 @@ const GroupMenu: React.FC = () => {
   const currentTodoGroupId = useAppSelector(
     (state) => state.group.currentTodoGroupId
   );
+  const currentNoteGroupId = useAppSelector(
+    (state) => state.group.currentNoteGroupId
+  );
   const {isTodo, isNote} = usePageType();
   const todoGroups = useAppSelector((state) => state.group.todoGroups);
   const noteGroups = useAppSelector((state) => state.group.noteGroups);
@@ -54,7 +61,7 @@ const GroupMenu: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const [selectedKeys, setSelectedKeys] = useState([
-    currentTodoGroupId.toString()
+    isTodo ? currentTodoGroupId.toString() : currentNoteGroupId.toString()
   ]);
 
   const [createGroupOpened, setCreateGroupOpened] = useState(false);
@@ -67,13 +74,21 @@ const GroupMenu: React.FC = () => {
 
   const onClickMenuItem = useCallback(
     (key) => {
-      if (key === currentTodoGroupId) {
+      if (isTodo && key === currentTodoGroupId) {
         return;
       }
-      dispatch(setCurrentTodoGroupId({groupId: key}));
+      if (isNote && key === currentNoteGroupId) {
+        return;
+      }
+
+      if (isTodo) {
+        dispatch(setCurrentTodoGroupId({groupId: key}));
+      } else {
+        dispatch(setCurrentNoteGroupId({groupId: key}));
+      }
       setSelectedKeys([key.toString()]);
     },
-    [currentTodoGroupId, dispatch]
+    [currentNoteGroupId, currentTodoGroupId, dispatch, isNote, isTodo]
   );
 
   const getTodoGroupList = useCallback(() => {
@@ -93,9 +108,27 @@ const GroupMenu: React.FC = () => {
     });
   }, [dispatch]);
 
+  const getNoteGroupList = useCallback(() => {
+    window.api.getNoteGroupList().then((res) => {
+      if (res.result) {
+        const tree = buildTree(
+          res.result.map((item) => {
+            return {
+              ...item,
+              id: item.id.toString(),
+              parentId: isNull(item.parentId) ? null : item.parentId.toString()
+            };
+          })
+        );
+        dispatch(setNoteGroups({groups: tree}));
+      }
+    });
+  }, [dispatch]);
+
   useEffect(() => {
     getTodoGroupList();
-  }, [getTodoGroupList]);
+    getNoteGroupList();
+  }, [getNoteGroupList, getTodoGroupList]);
 
   // 监听点击创建分组按钮
   const onClickCreateGroupBtn = useCallback(() => {
@@ -119,22 +152,33 @@ const GroupMenu: React.FC = () => {
         onOk: () => {
           window.api.deleteTodoGroup({id: groupId}).then(() => {
             message.success('删除成功');
-            getTodoGroupList();
-            setSelectedKeys(['-1']);
-            dispatch(setCurrentTodoGroupId({groupId: '-1'}));
+            if (isTodo) {
+              getTodoGroupList();
+              setSelectedKeys(['-1']);
+              dispatch(setCurrentTodoGroupId({groupId: '-1'}));
+              return;
+            }
+            if (isNote) {
+              getNoteGroupList();
+              setSelectedKeys(['-3']);
+              dispatch(setCurrentTodoGroupId({groupId: '-3'}));
+            }
           });
         }
       });
     },
-    [dispatch, getTodoGroupList]
+    [dispatch, getNoteGroupList, getTodoGroupList, isNote, isTodo]
   );
 
   /** 监听编辑分组 */
   const onEditGroup = useCallback(() => {
-    const groupDetail = findObjectById(groups, currentTodoGroupId);
+    const groupDetail = findObjectById(
+      groups,
+      isTodo ? currentTodoGroupId : currentNoteGroupId
+    );
     editGroupForm.setFieldValue('groupName', groupDetail.title);
     setEditGroupOpened(true);
-  }, [currentTodoGroupId, editGroupForm, groups]);
+  }, [currentNoteGroupId, currentTodoGroupId, editGroupForm, groups, isTodo]);
 
   /** 监听点击创建子分组 */
   const onCreateSubGroup = useCallback(() => {
@@ -336,15 +380,29 @@ const GroupMenu: React.FC = () => {
         message.warning('请输入分组名称');
         return;
       }
+      if (isTodo) {
+        window.api
+          .createTodoGroup({
+            title: groupName
+          })
+          .then((res) => {
+            if (res.changes === 1) {
+              message.success('创建成功');
+              onCancelCreateGroup();
+              getTodoGroupList();
+            }
+          });
+        return;
+      }
       window.api
-        .createTodoGroup({
+        .createNoteGroup({
           title: groupName
         })
         .then((res) => {
           if (res.changes === 1) {
             message.success('创建成功');
             onCancelCreateGroup();
-            getTodoGroupList();
+            getNoteGroupList();
           }
         });
     },
@@ -363,16 +421,31 @@ const GroupMenu: React.FC = () => {
         message.warning('请输入分组名称');
         return;
       }
+      if (isTodo) {
+        window.api
+          .createTodoGroup({
+            title: groupName,
+            parentId: currentTodoGroupId
+          })
+          .then((res) => {
+            if (res.changes === 1) {
+              message.success('创建成功');
+              onCancelCreateSubGroup();
+              getTodoGroupList();
+            }
+          });
+        return;
+      }
       window.api
-        .createTodoGroup({
+        .createNoteGroup({
           title: groupName,
-          parentId: currentTodoGroupId
+          parentId: currentNoteGroupId
         })
         .then((res) => {
           if (res.changes === 1) {
             message.success('创建成功');
             onCancelCreateSubGroup();
-            getTodoGroupList();
+            getNoteGroupList();
           }
         });
     },
@@ -383,7 +456,7 @@ const GroupMenu: React.FC = () => {
     }
   );
 
-  // 修改分组
+  // 确认修改分组
   const onConfirmEditGroup = throttle(
     () => {
       const {groupName} = editGroupForm.getFieldsValue();
@@ -391,18 +464,37 @@ const GroupMenu: React.FC = () => {
         message.warning('请输入分组名称');
         return;
       }
-      const groupDetail = findObjectById(groups, currentTodoGroupId);
+      const groupDetail = findObjectById(
+        groups,
+        isTodo ? currentTodoGroupId : currentNoteGroupId
+      );
+      if (isTodo) {
+        window.api
+          .updateTodoGroup({
+            title: groupName,
+            id: currentTodoGroupId,
+            parentId: groupDetail.parentId
+          })
+          .then((res) => {
+            if (res.changes === 1) {
+              message.success('修改成功');
+              onCancelEditGroup();
+              getTodoGroupList();
+            }
+          });
+        return;
+      }
       window.api
-        .updateTodoGroup({
+        .updateNoteGroup({
           title: groupName,
-          id: currentTodoGroupId,
+          id: currentNoteGroupId,
           parentId: groupDetail.parentId
         })
         .then((res) => {
           if (res.changes === 1) {
             message.success('修改成功');
             onCancelEditGroup();
-            getTodoGroupList();
+            getNoteGroupList();
           }
         });
     },

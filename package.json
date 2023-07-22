@@ -70,8 +70,6 @@
     "react-intl": "^6.3.2",
     "react-redux": "^8.0.7",
     "react-router-dom": "^6.10.0",
-    "redux": "^4.2.1",
-    "slate": "^0.94.1",
-    "slate-react": "^0.97.2"
+    "redux": "^4.2.1"
   }
 }

@@ -9,16 +9,17 @@ import {Avatar, Menu, MenuProps} from 'antd';
 import {useCallback, useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {useAppSelector} from 'src/hooks/store';
+import {MenuType} from 'src/utils/types';
 
 const menuItems: MenuProps['items'] = [
   {
     label: '我的待办',
-    key: 'todo',
+    key: MenuType.Todo,
     icon: <CarryOutOutlined />
   },
   {
     label: '我的笔记',
-    key: 'note',
+    key: MenuType.Note,
     icon: <ReadOutlined />
   }
 ];
@@ -36,9 +37,14 @@ const Header = () => {
 
   const onClickMenu = useCallback(
     (e: { key: string }) => {
-      navigate(e.key);
+      const currentPath = location.pathname;
+      const targetPath = '/' + e.key;
+      if (currentPath === targetPath) {
+        return;
+      }
+      navigate(targetPath);
     },
-    [navigate]
+    [location, navigate]
   );
 
   useEffect(() => {

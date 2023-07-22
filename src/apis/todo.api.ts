@@ -1,5 +1,8 @@
-export const defaultTodoPriority = 2;
-export const defaultTodoProgress = 0;
+import {
+  DEFAULT_TODO_PRIORITY,
+  DEFAULT_TODO_PROGRESS
+} from 'src/utils/constant';
+import {GroupType} from 'src/utils/types';
 
 /** 创建待办事项 */
 export async function createTodo(db, event, params) {
@@ -9,8 +12,8 @@ export async function createTodo(db, event, params) {
   const name = params.name;
   const createTime = new Date().getTime();
   const updateTime = createTime;
-  const priority = defaultTodoPriority;
-  const progress = defaultTodoProgress;
+  const priority = DEFAULT_TODO_PRIORITY;
+  const progress = DEFAULT_TODO_PROGRESS;
   return insertStmt.run(
     name,
     params.groupId,
@@ -181,19 +184,20 @@ export async function batchRecoverTodo(db, event, params) {
   return transaction();
 }
 
-/** 新建分组 */
+/** 新建待办分组 */
 export async function createTodoGroup(db, event, params) {
   const statement = db.prepare(
-    'insert into groups (title, parentId, createTime) values (?, ?, ?)'
+    'insert into groups (title, parentId, createTime, type) values (?, ?, ?, ?)'
   );
   return statement.run(
     params.title,
     params.parentId || null,
-    new Date().getTime()
+    new Date().getTime(),
+    GroupType.Todo
   );
 }
 
-/** 修改分组 */
+/** 修改待办分组 */
 export async function updateTodoGroup(db, event, params) {
   const statement = db.prepare(
     'update groups set title = @title, parentId = @parentId where id = @id'
@@ -225,10 +229,10 @@ export async function deleteTodoGroup(db, event, params) {
   return transaction();
 }
 
-/** 获取分组 */
+/** 获取待办事项分组 */
 export async function getTodoGroupList(db) {
   const query = db.prepare(
-    'select id, title, parentId, createTime, deleteTime from groups where deleteTime is null'
+    'select id, title, parentId, createTime, deleteTime from groups where deleteTime is null and type = 1'
   );
   const result = query.all();
   return {

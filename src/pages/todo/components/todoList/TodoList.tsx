@@ -4,13 +4,13 @@ import {
   AlertOutlined,
   CheckCircleFilled,
   CheckOutlined,
-  CheckSquareOutlined,
   ClearOutlined,
   ClockCircleOutlined,
   CoffeeOutlined,
   FieldTimeOutlined,
   RetweetOutlined,
-  RocketOutlined
+  RocketOutlined,
+  UndoOutlined
 } from '@ant-design/icons';
 import {useRequest} from 'ahooks';
 import {
@@ -810,6 +810,7 @@ const TodoList = () => {
               type="primary"
               onClick={onClickBatchRecover}
               className="ml-10"
+              icon={<UndoOutlined />}
             >
               批量恢复
             </Button>
