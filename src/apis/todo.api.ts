@@ -1,3 +1,6 @@
+import type {Database} from 'better-sqlite3';
+import {TodoItem} from 'src/types';
+import {GroupItem} from 'src/types/group';
 import {
   DEFAULT_TODO_PRIORITY,
   DEFAULT_TODO_PROGRESS
@@ -5,7 +8,7 @@ import {
 import {GroupType} from 'src/utils/types';
 
 /** 创建待办事项 */
-export async function createTodo(db, event, params) {
+export async function createTodo(db: Database, event, params) {
   const insertStmt = db.prepare(
     'INSERT INTO todos (name, groupId, createTime, updateTime, priority, progress) VALUES (?, ?, ?, ?, ?, ?)'
   );
@@ -25,7 +28,7 @@ export async function createTodo(db, event, params) {
 }
 
 /** 获取待办列表 */
-export async function getTodoList(db, event, params) {
+export async function getTodoList(db: Database, event, params) {
   // 废纸篓的数据
   if (params.groupId.toString() === '-2') {
     const query = db.prepare(
@@ -45,7 +48,7 @@ export async function getTodoList(db, event, params) {
 }
 
 /** 修改 todo 的优先级 */
-export async function updateTodoPriority(db, event, params) {
+export async function updateTodoPriority(db: Database, event, params) {
   const updateStatement = db.prepare(
     'update todos set priority = ?, updateTime = ? where id = ?'
   );
@@ -53,7 +56,7 @@ export async function updateTodoPriority(db, event, params) {
 }
 
 /** 修改 todo 的进度 */
-export async function updateTodoProgress(db, event, params) {
+export async function updateTodoProgress(db: Database, event, params) {
   const updateStatement = db.prepare(
     'update todos set progress = ?, updateTime = ? where id = ?'
   );
@@ -61,7 +64,7 @@ export async function updateTodoProgress(db, event, params) {
 }
 
 /** 修改 todo 的截止时间 */
-export async function updateTodoDeadline(db, event, params) {
+export async function updateTodoDeadline(db: Database, event, params) {
   const updateStatement = db.prepare(
     'update todos set deadline = ?, updateTime = ? where id = ?'
   );
@@ -69,7 +72,7 @@ export async function updateTodoDeadline(db, event, params) {
 }
 
 /** 获取 todo 的详细信息 */
-export async function getTodoDetail(db, event, params) {
+export async function getTodoDetail(db: Database, event, params) {
   const statement = db.prepare(
     'select name, id, content from todos where id = ?'
   );
@@ -77,7 +80,7 @@ export async function getTodoDetail(db, event, params) {
 }
 
 /** 设置 todo 的详细信息 */
-export async function updateTodoDetail(db, event, params) {
+export async function updateTodoDetail(db: Database, event, params) {
   const statement = db.prepare(
     'update todos set name = ?, content = ?, updateTime = ? where id = ?'
   );
@@ -90,7 +93,7 @@ export async function updateTodoDetail(db, event, params) {
 }
 
 /** 批量完成待办事项 */
-export async function batchFinishTodo(db, event, params) {
+export async function batchFinishTodo(db: Database, event, params) {
   const statement = db.prepare(
     'update todos set progress = @progress, updateTime = @updateTime where id = @id'
   );
@@ -108,7 +111,7 @@ export async function batchFinishTodo(db, event, params) {
 }
 
 /** 批量删除待办事项 */
-export async function batchDeleteTodo(db, event, params) {
+export async function batchDeleteTodo(db: Database, event, params) {
   // 在废纸篓中删除
   if (params.hard) {
     const transaction = db.transaction(() => {
@@ -138,14 +141,14 @@ export async function batchDeleteTodo(db, event, params) {
 }
 
 /** 批量恢复待办事项 */
-export async function batchRecoverTodo(db, event, params) {
-  const cachedGroupIds: any = {};
+export async function batchRecoverTodo(db: Database, event, params) {
+  const cachedGroupIds = {};
   const transaction = db.transaction(() => {
     for (const todoId of params.ids) {
       const getTodoDetailStatement = db.prepare(
         'select name, id, groupId, content from todos where id = ?'
       );
-      const todoDetail = getTodoDetailStatement.get(todoId);
+      const todoDetail = getTodoDetailStatement.get(todoId) as TodoItem;
 
       const groupId = todoDetail.groupId;
 
@@ -168,7 +171,7 @@ export async function batchRecoverTodo(db, event, params) {
         updateTodoStatement.run(-1, todoId);
       }
 
-      const groupDetail = getGroupDetailStatement.get(groupId);
+      const groupDetail = getGroupDetailStatement.get(groupId) as GroupItem;
       // 分组未被删除
       if (!groupDetail.deleteTime) {
         cachedGroupIds[todoDetail.groupId] = 1;
@@ -185,7 +188,7 @@ export async function batchRecoverTodo(db, event, params) {
 }
 
 /** 新建待办分组 */
-export async function createTodoGroup(db, event, params) {
+export async function createTodoGroup(db: Database, event, params) {
   const statement = db.prepare(
     'insert into groups (title, parentId, createTime, type) values (?, ?, ?, ?)'
   );
@@ -198,7 +201,7 @@ export async function createTodoGroup(db, event, params) {
 }
 
 /** 修改待办分组 */
-export async function updateTodoGroup(db, event, params) {
+export async function updateTodoGroup(db: Database, event, params) {
   const statement = db.prepare(
     'update groups set title = @title, parentId = @parentId where id = @id'
   );
@@ -210,7 +213,7 @@ export async function updateTodoGroup(db, event, params) {
 }
 
 /** 删除分组 */
-export async function deleteTodoGroup(db, event, params) {
+export async function deleteTodoGroup(db: Database, event, params) {
   const statement = db.prepare(
     'update groups set deleteTime = @deleteTime where id = @id'
   );
@@ -241,7 +244,7 @@ export async function getTodoGroupList(db) {
 }
 
 /** 批量移动分组 */
-export async function batchRemoveGroup(db, event, params) {
+export async function batchRemoveGroup(db: Database, event, params) {
   const transaction = db.transaction(() => {
     for (const id of params.ids) {
       const statement = db.prepare('update todos set groupId = ? where id = ?');

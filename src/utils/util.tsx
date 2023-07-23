@@ -71,7 +71,11 @@ export function findObjectById(tree, id) {
   return null;
 }
 
-export function convertGroupList(groups, currentGroupId) {
+export function convertGroupList(
+  groups,
+  currentGroupId,
+  type: 'todo' | 'note' = 'todo'
+) {
   const fn = (group) => {
     const {id, ...rest} = group;
     const newObj = {
@@ -86,11 +90,20 @@ export function convertGroupList(groups, currentGroupId) {
   };
 
   const _groups = groups.map(fn);
-  _groups.unshift({
-    value: '-1',
-    title: '近期待办',
-    ...('-1' === currentGroupId ? {disabled: true} : {})
-  });
+  if (type === 'todo') {
+    _groups.unshift({
+      value: '-1',
+      title: '近期待办',
+      ...('-1' === currentGroupId ? {disabled: true} : {})
+    });
+  } else if (type === 'note') {
+    _groups.unshift({
+      value: '-3',
+      title: '随手笔记',
+      ...('-3' === currentGroupId ? {disabled: true} : {})
+    });
+  }
+
   return _groups;
 }
 

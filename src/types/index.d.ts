@@ -1,4 +1,25 @@
-export type ApiFunction<Params, Result> = (...args: Params) => Promise<Result>;
+import {
+  CreateNoteParams,
+  CreateNoteResponse,
+  DeleteNoteParams,
+  DeleteNoteResponse,
+  GetNoteDetailParams,
+  GetNoteDetailResponse,
+  GetNoteListParams,
+  GetNoteListResponse,
+  MoveNoteGroupParams,
+  MoveNoteGroupResponse,
+  UpdateNoteContentParams,
+  UpdateNoteContentResponse,
+  UpdateNoteGroupParams,
+  UpdateNoteGroupResponse,
+  UpdateNoteTitleParams,
+  UpdateNoteTitleResponse
+} from 'src/apis/api.definition';
+
+export type ApiFunction<Params, Response> = (
+  params: Params
+) => Promise<Response>;
 
 export interface TodoItem {
   /** 待办 ID */
@@ -15,6 +36,8 @@ export interface TodoItem {
   updateTime: number;
   /** 删除时间 */
   deleteTime: number | null;
+  /** 分支 ID */
+  groupId: string;
 }
 
 export declare global {
@@ -38,6 +61,23 @@ export declare global {
       batchRemoveGroup: ApiFunction;
       createNoteGroup: ApiFunction;
       updateNoteGroup: ApiFunction;
+      createNote: ApiFunction<CreateNoteParams, CreateNoteResponse>;
+      getNoteList: ApiFunction<GetNoteListParams, GetNoteListResponse>;
+      updateNoteTitle: ApiFunction<
+        UpdateNoteTitleParams,
+        UpdateNoteTitleResponse
+      >;
+      updateNoteContent: ApiFunction<
+        UpdateNoteContentParams,
+        UpdateNoteContentResponse
+      >;
+      updateNoteGroup: ApiFunction<
+        UpdateNoteGroupParams,
+        UpdateNoteGroupResponse
+      >;
+      deleteNote: ApiFunction<DeleteNoteParams, DeleteNoteResponse>;
+      getNoteDetail: ApiFunction<GetNoteDetailParams, GetNoteDetailResponse>;
+      moveNoteGroup: ApiFunction<MoveNoteGroupParams, MoveNoteGroupResponse>;
     };
   }
 }

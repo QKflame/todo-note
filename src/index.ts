@@ -27,6 +27,8 @@ const createWindow = (): void => {
     }
   });
 
+  mainWindow.maximize();
+
   mainWindow.webContents.setWindowOpenHandler(({url}) => {
     shell.openExternal(url);
     return {action: 'deny'};
