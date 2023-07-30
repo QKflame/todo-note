@@ -1,24 +1,12 @@
 import './todoDrawer.less';
-import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
-import {IDomEditor, IEditorConfig, IToolbarConfig} from '@wangeditor/editor';
-import {Editor, Toolbar} from '@wangeditor/editor-for-react';
-import {Button, Drawer, DrawerProps, Input, notification} from 'antd';
-import {throttle} from 'lodash';
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState
-} from 'react';
+import {Drawer, DrawerProps, Input, notification} from 'antd';
+import {debounce, isNil, throttle} from 'lodash';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import ReactQuill from 'react-quill';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
-import {
-  resetTodoDetail,
-  setTodoDetail,
-  toggleIsTodoDrawerOpened
-} from 'src/store/todos';
+import {resetTodoDetail, toggleIsTodoDrawerOpened} from 'src/store/todos';
+import {quillFormats, quillModules} from 'src/utils/quill';
 
 interface TodoDrawerProps {
   open: boolean;
@@ -30,122 +18,90 @@ interface TodoDrawerProps {
   onSwitchRight?: () => void;
 }
 
-const TodoEditor = forwardRef((props, ref) => {
-  const [editor, setEditor] = useState<IDomEditor | null>(null);
-
+const TodoEditor = () => {
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
+  const [value, setValue] = useState('');
+  const modules = useRef(quillModules);
+  const formats = useRef(quillFormats);
 
-  const dispatch = useAppDispatch();
+  const updateTodoDetail = debounce((content: string) => {
+    window.api.updateTodoDetail({
+      ...todoDetail,
+      content
+    });
+  }, 500);
 
-  // 工具栏配置
-  const toolbarConfig: Partial<IToolbarConfig> = {};
+  const onEditorChange = useCallback(
+    (e) => {
+      setValue(e);
+      updateTodoDetail(e);
+    },
+    [updateTodoDetail]
+  );
 
-  // 编辑器配置
-  const editorConfig: Partial<IEditorConfig> = {
-    placeholder: '请输入内容...'
-  };
-
-  // 及时销毁 editor ，重要！
   useEffect(() => {
-    return () => {
-      if (editor === null) return;
-      editor.destroy();
-      setEditor(null);
-    };
-  }, [editor]);
-
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        destroy: () => {
-          editor.blur();
-          editor.destroy();
-          setEditor(null);
-        },
-        blur: () => {
-          editor.blur();
-        }
-      };
-    },
-    [editor]
-  );
-
-  const onChange = useCallback(
-    (editor) => {
-      dispatch(
-        setTodoDetail({
-          ...todoDetail,
-          content: editor.getHtml()
-        })
-      );
-    },
-    [dispatch, todoDetail]
-  );
+    if (!isNil(todoDetail?.content)) {
+      setValue(todoDetail.content);
+    }
+  }, [todoDetail?.content]);
 
   return (
     <>
       <div className="todo-editor-container">
-        <Toolbar
-          editor={editor}
-          defaultConfig={toolbarConfig}
-          mode="default"
-          style={{borderBottom: '1px solid #f2f2f2'}}
-        />
-        <Editor
-          defaultConfig={editorConfig}
-          value={todoDetail.content || ''}
-          onCreated={setEditor}
-          onChange={onChange}
-          mode="default"
-          style={{height: 'calc(100% - 120px)'}}
+        <ReactQuill
+          theme="snow"
+          value={value}
+          onChange={(e) => onEditorChange(e)}
+          modules={modules.current}
+          formats={formats.current}
+          placeholder="请输入笔记内容"
         />
       </div>
     </>
   );
-});
+};
 
-const TodoTitle = forwardRef((props, ref) => {
+const TodoTitle = () => {
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
-  const dispatch = useAppDispatch();
   const inputRef = useRef(null);
+  const [value, setValue] = useState('');
+
+  const updateTodoDetail = debounce((name: string) => {
+    window.api.updateTodoDetail({
+      ...todoDetail,
+      name
+    });
+  }, 500);
+
+  useEffect(() => {
+    if (!isNil(todoDetail?.name)) {
+      setValue(todoDetail?.name);
+    }
+  }, [todoDetail?.name]);
+
   const onChange = useCallback(
     (e) => {
-      dispatch(
-        setTodoDetail({
-          ...todoDetail,
-          name: e.target.value
-        })
-      );
+      const name = e.target.value;
+      setValue(name);
+      updateTodoDetail(name);
     },
-    [dispatch, todoDetail]
+    [updateTodoDetail]
   );
-
-  useImperativeHandle(ref, () => {
-    return {
-      blur: () => {
-        inputRef.current.blur();
-      }
-    };
-  });
 
   return (
     <Input
       placeholder="请输入待办事项"
       bordered={false}
-      value={todoDetail.name}
+      value={value}
       onChange={onChange}
       ref={inputRef}
     />
   );
-});
+};
 
 const TodoDrawer = (props: TodoDrawerProps) => {
   const {open, onClose} = props;
   const [placement] = useState<DrawerProps['placement']>('right');
-
-  const todoEditor = useRef(null);
-  const todoTitle = useRef(null);
 
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
 
@@ -165,8 +121,6 @@ const TodoDrawer = (props: TodoDrawerProps) => {
 
     window.api.updateTodoDetail(todoDetail).then((res) => {
       if (res.changes === 1) {
-        todoEditor.current.blur();
-        todoTitle.current.blur();
         dispatch(toggleIsTodoDrawerOpened());
         props.onSaveSuccess();
       }
@@ -207,41 +161,16 @@ const TodoDrawer = (props: TodoDrawerProps) => {
       onClose={onClose}
       open={open}
       autoFocus={true}
-      closeIcon={<div style={{fontSize: 14}}>关闭</div>}
       mask={true}
+      closeIcon={<div style={{fontSize: 12}}>关闭</div>}
       className="todo-drawer-container"
-      extra={<TodoTitle ref={todoTitle} />}
+      extra={<TodoTitle />}
       destroyOnClose={true}
       afterOpenChange={afterOpenChange}
-      // forceRender={true}
-      footer={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '10px'
-          }}
-        >
-          <div>
-            {/* <Button
-              icon={<LeftOutlined />}
-              style={{marginRight: 10}}
-              onClick={props.onSwitchLeft}
-            ></Button>
-            <Button
-              icon={<RightOutlined />}
-              onClick={props.onSwitchRight}
-            ></Button> */}
-          </div>
-          <Button type="primary" onClick={onClickConfirmBtn}>
-            保存
-          </Button>
-        </div>
-      }
     >
-      <TodoEditor ref={todoEditor}></TodoEditor>
+      <TodoEditor />
     </Drawer>
   );
 };
 
-export default TodoDrawer;
+export default React.memo(TodoDrawer);

@@ -50,3 +50,66 @@
     background: #179a16;
   }
 }
+
+.todo-drawer-container {
+  .quill {
+    position: relative;
+    flex-grow: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% + 20px);
+    .ql-toolbar {
+      border: none !important;
+      border-bottom: 1px solid #f2f2f2 !important;
+      padding: 8px 0 !important;
+
+      .ql-formats {
+        margin-right: 4px !important;
+      }
+    }
+
+    .ql-container {
+      flex-grow: 1;
+      border: none !important;
+      overflow: auto;
+
+      .ql-editor {
+        padding: 0;
+        padding-top: 12px;
+
+        // 滚动条宽度
+        &::-webkit-scrollbar {
+          width: 8px !important;
+        }
+
+        // 滚动条背景色
+        &::-webkit-scrollbar-track {
+          background-color: #f2f2f2;
+          border-radius: 4px;
+        }
+
+        // 滚动条滑块样式
+        &::-webkit-scrollbar-thumb {
+          background-color: #d2d2d2;
+          border-radius: 4px;
+        }
+
+        p {
+          font-size: 14px;
+          font-weight: 400;
+          color: #333;
+          line-height: 24px;
+          margin-bottom: 12px;
+        }
+      }
+
+      .ql-blank::before {
+        color: #e2e2e2 !important;
+        left: 0 !important;
+        font-style: normal;
+        line-height: 24px;
+      }
+    }
+  }
+}

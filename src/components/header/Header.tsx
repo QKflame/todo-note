@@ -13,7 +13,7 @@ import {MenuType} from 'src/utils/types';
 
 const menuItems: MenuProps['items'] = [
   {
-    label: '待办中心',
+    label: '待办事项',
     key: MenuType.Todo,
     icon: <CarryOutOutlined />
   },

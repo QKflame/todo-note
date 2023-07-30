@@ -110,11 +110,6 @@ const TodoList = () => {
     [dispatch, isTrash]
   );
 
-  const onTodoDrawerClose = useCallback(() => {
-    dispatch(toggleIsTodoDrawerOpened());
-    dispatch(resetTodoDetail());
-  }, [dispatch]);
-
   const {run: queryTodoList} = useRequest(window.api.getTodoList, {
     manual: true,
     onSuccess: (res: any) => {
@@ -127,6 +122,12 @@ const TodoList = () => {
   const getTodoList = useCallback(() => {
     queryTodoList({groupId: currentTodoGroupId});
   }, [currentTodoGroupId, queryTodoList]);
+
+  const onTodoDrawerClose = useCallback(() => {
+    dispatch(toggleIsTodoDrawerOpened());
+    dispatch(resetTodoDetail());
+    getTodoList();
+  }, [dispatch, getTodoList]);
 
   useEffect(() => {
     getTodoList();

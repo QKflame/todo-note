@@ -18,6 +18,7 @@ import ReactQuill from 'react-quill';
 import {useDispatch} from 'react-redux';
 import {useAppSelector} from 'src/hooks/store';
 import {setCurrentNoteDetail, setNoteList} from 'src/store/notes';
+import {quillFormats, quillModules} from 'src/utils/quill';
 Quill.register('modules/emoji', Emoji);
 
 const NoteEditor: React.FC = React.memo(() => {
@@ -31,48 +32,8 @@ const NoteEditor: React.FC = React.memo(() => {
   const noteList = useAppSelector((state) => state.notes.noteList);
   const dispatch = useDispatch();
 
-  const modules = useRef({
-    // https://quilljs.com/docs/modules/syntax/
-    syntax: false,
-    toolbar: {
-      container: [
-        [{header: [1, 2, 3, 4, 5, 6, false]}],
-        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-        [{color: []}, {background: []}],
-        [
-          {list: 'ordered'},
-          {list: 'bullet'},
-          {indent: '-1'},
-          {indent: '+1'},
-          {align: []}
-        ],
-        ['link', 'image'],
-        ['emoji'],
-        ['clean']
-      ],
-      handlers: {emoji: function () {}}
-    },
-    'emoji-toolbar': true
-  });
-
-  const formats = useRef([
-    'header',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'size',
-    'color',
-    'background',
-    'list',
-    'bullet',
-    'indent',
-    'link',
-    'image',
-    'code-block',
-    'emoji'
-  ]);
+  const modules = useRef(quillModules);
+  const formats = useRef(quillFormats);
 
   // 是否为废纸篓界面
   const isTrash = useMemo(() => {
