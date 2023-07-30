@@ -5,4 +5,6 @@ export interface NoteItem {
   updateTime: number;
   createTime: number;
   deleteTime: number | null;
+  originGroupId: string | null;
+  groupId: string;
 }

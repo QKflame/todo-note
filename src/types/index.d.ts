@@ -9,6 +9,8 @@ import {
   GetNoteListResponse,
   MoveNoteGroupParams,
   MoveNoteGroupResponse,
+  RecoverNoteParams,
+  RecoverNoteResponse,
   UpdateNoteContentParams,
   UpdateNoteContentResponse,
   UpdateNoteGroupParams,
@@ -78,6 +80,7 @@ export declare global {
       deleteNote: ApiFunction<DeleteNoteParams, DeleteNoteResponse>;
       getNoteDetail: ApiFunction<GetNoteDetailParams, GetNoteDetailResponse>;
       moveNoteGroup: ApiFunction<MoveNoteGroupParams, MoveNoteGroupResponse>;
+      recoverNote: ApiFunction<RecoverNoteParams, RecoverNoteResponse>;
     };
   }
 }

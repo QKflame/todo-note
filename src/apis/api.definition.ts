@@ -51,9 +51,21 @@ export type UpdateNoteContentResponse = ModifyApiResponse;
 
 export interface DeleteNoteParams {
   noteId: string;
+  groupId: string;
+  isTrash: boolean;
 }
 
 export interface DeleteNoteResponse {
+  changes: number;
+  lastInsertRowid: number;
+}
+
+export interface RecoverNoteParams {
+  noteId: string;
+  groupId: string;
+}
+
+export interface RecoverNoteResponse {
   changes: number;
   lastInsertRowid: number;
 }
@@ -83,5 +95,6 @@ export const apiDefinitions = [
   'updateNoteContent',
   'deleteNote',
   'moveNoteGroup',
-  'getNoteDetail'
+  'getNoteDetail',
+  'recoverNote'
 ];

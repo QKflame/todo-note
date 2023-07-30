@@ -1,6 +1,5 @@
 import './note.less';
 
-import React from 'react';
 import GroupMenu from 'src/components/groupMenu/GroupMenu';
 
 import NoteEditor from './components/NoteEditor';

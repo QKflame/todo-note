@@ -4,7 +4,7 @@ import React from 'react';
 export const convertTimestampToDuration = (timestamp: number) => {
   const monthDiff = dayjs().diff(dayjs(timestamp), 'month');
   if (monthDiff > 0) {
-    return formatTimestamp(timestamp);
+    return dayjs(timestamp).format('YYYY/MM/DD');
   }
 
   const weekDiff = dayjs().diff(dayjs(timestamp), 'week');

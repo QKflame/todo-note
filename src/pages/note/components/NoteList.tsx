@@ -31,6 +31,11 @@ const Header: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
     (state) => state.group.currentNoteGroupId
   );
 
+  // 是否为废纸篓界面
+  const isTrash = useMemo(() => {
+    return currentNoteGroupId === '-4';
+  }, [currentNoteGroupId]);
+
   /** 创建分组 */
   const onCreateNote = throttle(
     () => {
@@ -60,7 +65,7 @@ const Header: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
     setNoteTitle(e.target.value);
   }, []);
 
-  return (
+  return !isTrash ? (
     <div className="header-container">
       <Input
         size="middle"
@@ -71,6 +76,8 @@ const Header: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
         onChange={onNoteTitleChange}
       />
     </div>
+  ) : (
+    <></>
   );
 });
 
@@ -80,6 +87,16 @@ const List: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
   const currentNoteGroupId = useAppSelector(
     (state) => state.group.currentNoteGroupId
   );
+
+  const currentNoteDetail = useAppSelector(
+    (state) => state.notes.currentNoteDetail
+  );
+
+  // 是否为废纸篓界面
+  const isTrash = useMemo(() => {
+    return currentNoteGroupId === '-4';
+  }, [currentNoteGroupId]);
+
   const dispatch = useDispatch();
   const [isRemoveGroupModalOpen, setIsRemoveGroupModalOpen] = useState(false);
   const [moveGroupForm] = Form.useForm();
@@ -113,15 +130,66 @@ const List: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
           <div>
             <div style={{marginBottom: 10}}>是否确认删除当前笔记？</div>
             <Alert
-              message="当前笔记被删除后，可前往废纸篓进行恢复！"
+              message={
+                isTrash
+                  ? '在废纸篓进行删除后，无法恢复，请谨慎操作！'
+                  : '当前笔记被删除后，可前往废纸篓进行恢复！'
+              }
               type="error"
             ></Alert>
           </div>
         ),
         onOk: () => {
-          window.api.deleteNote({noteId: item.id}).then((res) => {
-            if (res.changes === 1) {
-              message.success('删除成功');
+          window.api
+            .deleteNote({
+              noteId: item.id,
+              isTrash,
+              groupId: item.groupId
+            })
+            .then((res) => {
+              if (res.changes === 1) {
+                message.success('删除成功');
+                const noteListLength = noteList.length;
+                if (index + 1 < noteListLength) {
+                  dispatch(setCurrentNoteId(noteList[index + 1].id));
+                } else if (index - 1 >= 0) {
+                  dispatch(setCurrentNoteId(noteList[index - 1].id));
+                } else if (index - 1 === -1) {
+                  dispatch(setCurrentNoteId(''));
+                  dispatch(setCurrentNoteDetail(null));
+                }
+                // 重新获取笔记列表
+                props.getNoteList();
+              }
+            });
+        }
+      });
+    },
+    [dispatch, isTrash, noteList, props]
+  );
+
+  /** 监听点击恢复按钮 */
+  const onClickRecoverBtn = useCallback(
+    (item: NoteItem, index: number) => {
+      Modal.confirm({
+        title: '恢复笔记',
+        content: (
+          <div>
+            <div style={{marginBottom: 10}}>是否确认恢复当前笔记？</div>
+            <Alert
+              message="若笔记所属分组已被删除，则恢复至 「随手笔记」分组中，若未被删除，则恢复至原分组中"
+              type="info"
+            ></Alert>
+          </div>
+        ),
+        onOk: () => {
+          window.api
+            .recoverNote({
+              noteId: currentNoteId,
+              groupId: item.originGroupId
+            })
+            .then(() => {
+              message.success('恢复成功');
               const noteListLength = noteList.length;
               if (index + 1 < noteListLength) {
                 dispatch(setCurrentNoteId(noteList[index + 1].id));
@@ -133,12 +201,11 @@ const List: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
               }
               // 重新获取笔记列表
               props.getNoteList();
-            }
-          });
+            });
         }
       });
     },
-    [dispatch, noteList, props]
+    [currentNoteId, dispatch, noteList, props]
   );
 
   /** 监听点击移动分组按钮 */
@@ -216,18 +283,33 @@ const List: React.FC<{ getNoteList: () => void }> = React.memo((props) => {
                             </Button>
                           )
                         },
-                        {
-                          key: 'createGroup',
-                          label: (
-                            <Button
-                              type="text"
-                              className="dropdown-action-name"
-                              onClick={onClickMoveGroupBtn}
-                            >
-                              移动
-                            </Button>
-                          )
-                        }
+                        isTrash
+                          ? {
+                            key: 'createGroup',
+                            label: (
+                              <Button
+                                type="text"
+                                className="dropdown-action-name"
+                                onClick={() => {
+                                  onClickRecoverBtn(item, index);
+                                }}
+                              >
+                                  恢复
+                              </Button>
+                            )
+                          }
+                          : {
+                            key: 'createGroup',
+                            label: (
+                              <Button
+                                type="text"
+                                className="dropdown-action-name"
+                                onClick={onClickMoveGroupBtn}
+                              >
+                                  移动
+                              </Button>
+                            )
+                          }
                       ]
                     }}
                     placement="bottom"

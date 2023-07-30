@@ -7,6 +7,7 @@ import {
   GetNoteDetailParams,
   GetNoteListParams,
   MoveNoteGroupParams,
+  RecoverNoteParams,
   UpdateNoteContentParams,
   UpdateNoteTitleParams
 } from './api.definition';
@@ -54,7 +55,7 @@ export async function getNoteList(
   params: GetNoteListParams
 ) {
   const statement = db.prepare(
-    'select id, title, groupId, createTime, updateTime, groupId from notes where groupId = ? and deleteTime is null'
+    'select id, title, groupId, createTime, updateTime, originGroupId from notes where groupId = ? and deleteTime is null'
   );
   return {
     result: statement.all(params.groupId)
@@ -130,6 +131,35 @@ export async function deleteNote(
   event,
   params: DeleteNoteParams
 ) {
-  const statement = db.prepare('update notes set groupId = -4 where id = ?');
-  return statement.run(params.noteId);
+  if (params.isTrash) {
+    const deleteStatement = db.prepare('delete from notes where id = ?');
+    return deleteStatement.run(params.noteId);
+  }
+  const statement = db.prepare(
+    'update notes set groupId = -4, originGroupId = ? where id = ?'
+  );
+  return statement.run(params.groupId, params.noteId);
+}
+
+/** 恢复笔记 */
+export async function recoverNote(
+  db: Database,
+  event,
+  params: RecoverNoteParams
+) {
+  if (params?.groupId?.toString() !== '-3') {
+    // 查询分组是否存在
+    const queryGroupStatement = db.prepare(
+      'select * from groups where id = ? and deleteTime is null'
+    );
+    const group = queryGroupStatement.get(params.groupId);
+    if (group) {
+      const statement = db.prepare('update notes set groupId = ? where id = ?');
+      return statement.run(params.groupId, params.noteId);
+    }
+
+    // 恢复到 -3 随手笔记分组中
+    const statement = db.prepare('update notes set groupId = ? where id = ?');
+    return statement.run(-3, params.noteId);
+  }
 }
