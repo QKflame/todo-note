@@ -15,8 +15,7 @@ yarn start
 # 执行构建
 
 ```shell
-export ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/"
-yarn make
+export ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/" && rm -rf out && yarn make
 ```
 
 # 待办事项
