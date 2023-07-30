@@ -81,6 +81,7 @@ export declare global {
       getNoteDetail: ApiFunction<GetNoteDetailParams, GetNoteDetailResponse>;
       moveNoteGroup: ApiFunction<MoveNoteGroupParams, MoveNoteGroupResponse>;
       recoverNote: ApiFunction<RecoverNoteParams, RecoverNoteResponse>;
+      getTodoFullData: ApiFunction<any?, any?>;
     };
   }
 }

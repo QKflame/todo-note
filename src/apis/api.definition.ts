@@ -96,5 +96,6 @@ export const apiDefinitions = [
   'deleteNote',
   'moveNoteGroup',
   'getNoteDetail',
-  'recoverNote'
+  'recoverNote',
+  'getTodoFullData'
 ];

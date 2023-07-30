@@ -39,6 +39,17 @@ const TodoEditor = () => {
     [updateTodoDetail]
   );
 
+  // 组件加载
+  useEffect(() => {
+    // 禁止拼音检查，导致出现红色波浪线
+    const quillNode = document.querySelector('.quill');
+    if (quillNode) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      quillNode.spellcheck = false;
+    }
+  }, []);
+
   useEffect(() => {
     if (!isNil(todoDetail?.content)) {
       setValue(todoDetail.content);

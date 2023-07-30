@@ -768,6 +768,34 @@ const TodoList = () => {
     });
   }, [dispatch, filteredDatasource, todoDetail.id]);
 
+  const [tableHeight, setTableHeight] = useState(null);
+
+  useEffect(() => {
+    const updateTableHeight = throttle(() => {
+      const innerHeight = window.innerHeight;
+      const headerHeight = 60;
+      const pagePadding = 2 * 20;
+      const toolbarHeight = 56;
+      const tableHeaderHeight = 48;
+      setTableHeight(
+        innerHeight -
+          headerHeight -
+          pagePadding -
+          toolbarHeight -
+          tableHeaderHeight -
+          10
+      );
+    }, 300);
+
+    updateTableHeight();
+
+    window.addEventListener('resize', updateTableHeight);
+
+    return () => {
+      window.removeEventListener('resize', updateTableHeight);
+    };
+  }, []);
+
   const handleSwitchRight = useCallback(() => {}, []);
 
   return (
@@ -843,6 +871,9 @@ const TodoList = () => {
         dataSource={filteredDatasource}
         size="middle"
         pagination={false}
+        scroll={{
+          y: tableHeight
+        }}
         rowClassName={(record) => {
           if (record.id === todoDetail.id) {
             return 'selected-todo-item-row';

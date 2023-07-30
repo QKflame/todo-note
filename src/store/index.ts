@@ -3,6 +3,7 @@ import {configureStore} from '@reduxjs/toolkit';
 import group from './group';
 import i18n from './i18n';
 import notes from './notes';
+import search from './search';
 import style from './style';
 import todos from './todos';
 
@@ -12,7 +13,8 @@ export const store = configureStore({
     i18n,
     style,
     group,
-    notes
+    notes,
+    search
   }
 });
 

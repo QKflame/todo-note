@@ -253,3 +253,11 @@ export async function batchRemoveGroup(db: Database, event, params) {
   });
   return transaction();
 }
+
+/** 获取待办事项的全量数据 */
+export async function getTodoFullData(db: Database, event) {
+  const query = db.prepare('select * from todos where deleteTime is null');
+  return {
+    result: query.all()
+  };
+}
