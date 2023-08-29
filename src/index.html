@@ -6,5 +6,13 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <script>
+      document.addEventListener('keydown', (event) => {
+        if (event.metaKey && event.key === 'r') {
+          event.preventDefault();
+        }
+      });
+    </script>
   </body>
 </html>

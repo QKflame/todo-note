@@ -17,6 +17,7 @@ export const quillModules = {
       ['emoji'],
       ['clean']
     ],
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     handlers: {emoji: function () {}}
   },
   'emoji-toolbar': true

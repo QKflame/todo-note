@@ -150,16 +150,18 @@ const NoteEditor: React.FC = React.memo(() => {
         visibility: currentNoteDetail ? 'visible' : 'hidden'
       }}
     >
-      <div className="note-title-container">
-        <Input
-          className="note-title"
-          placeholder="请输入笔记标题"
-          bordered={false}
-          value={currentNoteDetail?.title}
-          onChange={onNoteTitleChange}
-          disabled={isTrash}
-        ></Input>
-      </div>
+      {currentNoteDetail ? (
+        <div className="note-title-container">
+          <Input
+            className="note-title"
+            placeholder="请输入笔记标题"
+            bordered={false}
+            value={currentNoteDetail?.title}
+            onChange={onNoteTitleChange}
+            disabled={isTrash}
+          ></Input>
+        </div>
+      ) : null}
       <ReactQuill
         theme="snow"
         value={value}

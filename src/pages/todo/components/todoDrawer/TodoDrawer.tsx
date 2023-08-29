@@ -1,12 +1,24 @@
 import './todoDrawer.less';
+import 'react-quill/dist/quill.snow.css';
+import 'quill-emoji/dist/quill-emoji.css';
 
 import {Drawer, DrawerProps, Input, notification} from 'antd';
-import {debounce, isNil, throttle} from 'lodash';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {isNil} from 'lodash';
+import Quill from 'quill';
+import * as Emoji from 'quill-emoji';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState
+} from 'react';
 import ReactQuill from 'react-quill';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
-import {resetTodoDetail, toggleIsTodoDrawerOpened} from 'src/store/todos';
+import {resetTodoDetail} from 'src/store/todos';
 import {quillFormats, quillModules} from 'src/utils/quill';
+Quill.register('modules/emoji', Emoji);
 
 interface TodoDrawerProps {
   open: boolean;
@@ -18,26 +30,15 @@ interface TodoDrawerProps {
   onSwitchRight?: () => void;
 }
 
-const TodoEditor = () => {
+const TodoEditor = forwardRef((props, ref) => {
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
   const [value, setValue] = useState('');
   const modules = useRef(quillModules);
   const formats = useRef(quillFormats);
 
-  const updateTodoDetail = debounce((content: string) => {
-    window.api.updateTodoDetail({
-      ...todoDetail,
-      content
-    });
-  }, 500);
-
-  const onEditorChange = useCallback(
-    (e) => {
-      setValue(e);
-      updateTodoDetail(e);
-    },
-    [updateTodoDetail]
-  );
+  const onEditorChange = useCallback((e) => {
+    setValue(e);
+  }, []);
 
   // 组件加载
   useEffect(() => {
@@ -56,6 +57,14 @@ const TodoEditor = () => {
     }
   }, [todoDetail?.content]);
 
+  useImperativeHandle(ref, () => {
+    return {
+      getEditorContent: () => {
+        return value;
+      }
+    };
+  });
+
   return (
     <>
       <div className="todo-editor-container">
@@ -65,24 +74,17 @@ const TodoEditor = () => {
           onChange={(e) => onEditorChange(e)}
           modules={modules.current}
           formats={formats.current}
-          placeholder="请输入笔记内容"
+          placeholder="请输入待办内容"
         />
       </div>
     </>
   );
-};
+});
 
-const TodoTitle = () => {
+const TodoTitle = forwardRef((props, ref) => {
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
   const inputRef = useRef(null);
   const [value, setValue] = useState('');
-
-  const updateTodoDetail = debounce((name: string) => {
-    window.api.updateTodoDetail({
-      ...todoDetail,
-      name
-    });
-  }, 500);
 
   useEffect(() => {
     if (!isNil(todoDetail?.name)) {
@@ -90,14 +92,17 @@ const TodoTitle = () => {
     }
   }, [todoDetail?.name]);
 
-  const onChange = useCallback(
-    (e) => {
-      const name = e.target.value;
-      setValue(name);
-      updateTodoDetail(name);
-    },
-    [updateTodoDetail]
-  );
+  const onChange = useCallback((e) => {
+    setValue(e.target.value);
+  }, []);
+
+  useImperativeHandle(ref, () => {
+    return {
+      getTodoTitle: () => {
+        return value;
+      }
+    };
+  });
 
   return (
     <Input
@@ -108,35 +113,17 @@ const TodoTitle = () => {
       ref={inputRef}
     />
   );
-};
+});
 
 const TodoDrawer = (props: TodoDrawerProps) => {
   const {open, onClose} = props;
   const [placement] = useState<DrawerProps['placement']>('right');
 
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
+  const todoEditorRef = useRef(null);
+  const todoTitleRef = useRef(null);
 
   const dispatch = useAppDispatch();
-
-  const onClickConfirmBtn = throttle(() => {
-    // 校验内容
-    if (!todoDetail.name) {
-      notification.open({
-        message: '温馨提示',
-        description: '请输入待办事项标题',
-        placement: 'topLeft',
-        type: 'warning'
-      });
-      return;
-    }
-
-    window.api.updateTodoDetail(todoDetail).then((res) => {
-      if (res.changes === 1) {
-        dispatch(toggleIsTodoDrawerOpened());
-        props.onSaveSuccess();
-      }
-    });
-  }, 2000);
 
   const afterOpenChange = useCallback(
     (e) => {
@@ -147,6 +134,42 @@ const TodoDrawer = (props: TodoDrawerProps) => {
     [dispatch]
   );
 
+  const closing = useRef(false);
+
+  const onDrawerClose = useCallback(() => {
+    if (closing.current) {
+      return;
+    }
+
+    const content = todoEditorRef.current?.getEditorContent();
+    const title = todoTitleRef.current?.getTodoTitle();
+
+    if (!title) {
+      notification.open({
+        message: '温馨提示',
+        description: '请输入待办事项标题',
+        placement: 'topLeft',
+        type: 'warning'
+      });
+      return;
+    }
+
+    closing.current = true;
+
+    window.api
+      .updateTodoDetail({
+        ...todoDetail,
+        name: title,
+        content
+      })
+      .then(() => {
+        onClose();
+      })
+      .finally(() => {
+        closing.current = false;
+      });
+  }, [onClose, todoDetail]);
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (
@@ -154,7 +177,7 @@ const TodoDrawer = (props: TodoDrawerProps) => {
         (event.key === 's' || event.keyCode === 83)
       ) {
         event.preventDefault(); // 阻止默认的保存操作
-        onClickConfirmBtn();
+        onDrawerClose();
       }
     };
 
@@ -163,23 +186,23 @@ const TodoDrawer = (props: TodoDrawerProps) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClickConfirmBtn]);
+  }, [onDrawerClose]);
 
   return (
     <Drawer
       placement={placement}
       width={700}
-      onClose={onClose}
+      onClose={onDrawerClose}
       open={open}
       autoFocus={true}
       mask={true}
       closeIcon={<div style={{fontSize: 12}}>关闭</div>}
       className="todo-drawer-container"
-      extra={<TodoTitle />}
+      extra={<TodoTitle ref={todoTitleRef} />}
       destroyOnClose={true}
       afterOpenChange={afterOpenChange}
     >
-      <TodoEditor />
+      <TodoEditor ref={todoEditorRef} />
     </Drawer>
   );
 };
