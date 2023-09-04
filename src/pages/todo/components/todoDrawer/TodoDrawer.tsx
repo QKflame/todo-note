@@ -4,8 +4,7 @@ import 'quill-emoji/dist/quill-emoji.css';
 
 import {Drawer, DrawerProps, Input, notification} from 'antd';
 import {isNil} from 'lodash';
-import Quill from 'quill';
-import * as Emoji from 'quill-emoji';
+import Emoji from 'quill-emoji';
 import React, {
   forwardRef,
   useCallback,
@@ -14,10 +13,11 @@ import React, {
   useRef,
   useState
 } from 'react';
-import ReactQuill from 'react-quill';
+import ReactQuill, {Quill} from 'react-quill';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import {resetTodoDetail} from 'src/store/todos';
 import {quillFormats, quillModules} from 'src/utils/quill';
+
 Quill.register('modules/emoji', Emoji);
 
 interface TodoDrawerProps {

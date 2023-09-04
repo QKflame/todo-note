@@ -288,6 +288,7 @@ const TodoList = () => {
             </Tag>
           ) : (
             <Popover
+              overlayClassName="priority-popover-container"
               content={
                 <Segmented
                   value={value}
@@ -381,10 +382,12 @@ const TodoList = () => {
           ) : (
             <Popover
               content={
-                <Slider
-                  defaultValue={value}
-                  onChange={(v: number) => onProgressChange(v, item.id)}
-                />
+                <div className="progress-popover-container">
+                  <Slider
+                    defaultValue={value}
+                    onChange={(v: number) => onProgressChange(v, item.id)}
+                  />
+                </div>
               }
               title="设置进度"
               trigger="hover"
