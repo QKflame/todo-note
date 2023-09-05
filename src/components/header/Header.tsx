@@ -177,7 +177,7 @@ const Header = () => {
           size={32}
           icon={<UserOutlined />}
         /> */}
-        <Input
+        {/* <Input
           className="global-search-container"
           placeholder={searchPlaceholder}
           size="middle"
@@ -206,7 +206,7 @@ const Header = () => {
               color: '#999'
             }}
           ></Icon>
-        </Popover>
+        </Popover> */}
       </div>
 
       <Modal

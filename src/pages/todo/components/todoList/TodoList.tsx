@@ -16,6 +16,7 @@ import {useRequest} from 'ahooks';
 import {
   Alert,
   Button,
+  ConfigProvider,
   DatePicker,
   Form,
   Input,
@@ -23,6 +24,7 @@ import {
   Modal,
   Popover,
   Progress,
+  Result,
   Segmented,
   Slider,
   Table,
@@ -49,6 +51,14 @@ import {
 } from 'src/utils/util';
 
 import TodoDrawer from '../todoDrawer/TodoDrawer';
+
+const TableEmpty = () => (
+  <Result
+    status="404"
+    title={<div style={{fontSize: 14}}>暂无数据</div>}
+    subTitle="暂未查询到相关待办事项"
+  />
+);
 
 const TodoList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -250,6 +260,7 @@ const TodoList = () => {
         title: '优先级',
         dataIndex: 'priority',
         width: '60px',
+        align: 'center',
         filters: [
           {
             text: '紧急',
@@ -349,7 +360,8 @@ const TodoList = () => {
       {
         title: '进度',
         dataIndex: 'progress',
-        width: '30px',
+        width: '40px',
+        align: 'center',
         filters: [
           {
             text: '未开始',
@@ -867,23 +879,25 @@ const TodoList = () => {
         ></Alert>
       )}
 
-      <Table
-        rowSelection={rowSelection}
-        columns={columns}
-        rowKey="id"
-        dataSource={filteredDatasource}
-        size="middle"
-        pagination={false}
-        scroll={{
-          y: tableHeight
-        }}
-        rowClassName={(record) => {
-          if (record.id === todoDetail.id) {
-            return 'selected-todo-item-row';
-          }
-          return 'todo-item-row';
-        }}
-      />
+      <ConfigProvider renderEmpty={TableEmpty}>
+        <Table
+          rowSelection={rowSelection}
+          columns={columns}
+          rowKey="id"
+          dataSource={filteredDatasource}
+          size="middle"
+          pagination={false}
+          scroll={{
+            y: tableHeight
+          }}
+          rowClassName={(record) => {
+            if (record.id === todoDetail.id) {
+              return 'selected-todo-item-row';
+            }
+            return 'todo-item-row';
+          }}
+        />
+      </ConfigProvider>
 
       <TodoDrawer
         open={isTodoDrawerOpened}

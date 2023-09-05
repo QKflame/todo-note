@@ -14,7 +14,7 @@ export const quillModules = {
         {align: []}
       ],
       ['link', 'image'],
-      ['emoji'],
+      // ['emoji'],
       ['clean']
     ],
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -39,6 +39,6 @@ export const quillFormats = [
   'align',
   'link',
   'image',
-  'code-block',
-  'emoji'
+  'code-block'
+  // 'emoji'
 ];

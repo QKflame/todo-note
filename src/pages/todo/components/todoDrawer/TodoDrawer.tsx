@@ -18,7 +18,7 @@ import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import {resetTodoDetail} from 'src/store/todos';
 import {quillFormats, quillModules} from 'src/utils/quill';
 
-Quill.register('modules/emoji', Emoji);
+// Quill.register('modules/emoji', Emoji);
 
 interface TodoDrawerProps {
   open: boolean;
@@ -64,6 +64,9 @@ const TodoEditor = forwardRef((props, ref) => {
       }
     };
   });
+
+  console.log('modules.current', modules.current);
+  console.log('formats.current', formats.current);
 
   return (
     <>
