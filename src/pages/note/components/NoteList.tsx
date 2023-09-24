@@ -14,7 +14,13 @@ import {
 } from 'antd';
 import cx from 'classnames';
 import {isArray, orderBy, throttle} from 'lodash';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import {useDispatch} from 'react-redux';
 import {useAppSelector} from 'src/hooks/store';
 import {
@@ -406,8 +412,20 @@ const NoteList: React.FC = React.memo(() => {
     });
   }, [currentNoteGroupId, currentNoteId, dispatch]);
 
+  const timer = useRef(null);
+
   useEffect(() => {
     getNoteList();
+
+    timer.current = setInterval(() => {
+      getNoteList();
+    }, 60 * 1000);
+
+    return () => {
+      clearInterval(timer.current);
+      timer.current = null;
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentNoteGroupId]);
 

@@ -131,9 +131,7 @@ const Header = () => {
 
   const onConfirmDialogSearch = useCallback(() => {
     if (!searchKeyword) {
-      return;
     }
-    console.log('点击');
   }, [searchKeyword]);
 
   const handleSetFilteredData = useCallback(() => {
@@ -147,9 +145,7 @@ const Header = () => {
 
   useEffect(() => {
     if (searchDialogVisible) {
-      window.api.getTodoFullData({}).then((res) => {
-        console.log('res', res);
-      });
+      window.api.getTodoFullData({}).then((res) => {});
     }
     window.api.getTodoFullData({}).then((res) => {
       setFullData(res?.result || []);

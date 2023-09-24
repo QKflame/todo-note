@@ -4,7 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import 'quill-emoji/dist/quill-emoji.css';
 
 import {Input, message} from 'antd';
-import {cloneDeep, isNil, isNull} from 'lodash';
+import {cloneDeep, debounce, isNil, isNull} from 'lodash';
 import Quill from 'quill';
 import * as Emoji from 'quill-emoji';
 import React, {
@@ -63,39 +63,49 @@ const NoteEditor: React.FC = React.memo(() => {
     }
   }, []);
 
-  const onEditorChange = useCallback((e) => {
-    setValue(e);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onEditorChange = useCallback(
+    debounce((e) => {
+      // 更新当前编辑器的内容
+      setValue(e);
 
-  const updateNoteContentTimer = useRef(null);
+      // 设置笔记列表中的更新时间
+      // 设置笔记列表中的更新时间
+      const index = noteList.findIndex((item) => item.id === currentNoteId);
+      if (index > -1) {
+        const _noteList = cloneDeep(noteList);
+        _noteList[index].updateTime = new Date().getTime();
+        dispatch(setNoteList(_noteList));
+      }
 
-  useEffect(() => {
-    if (currentNoteDetail?.content === value) {
-      return;
-    }
+      // 调用接口进行内容更新
+      const noteId = currentNoteDetail?.id;
+      window.api.updateNoteContent({noteId, content: e});
+    }, 500),
+    [currentNoteDetail?.id]
+  );
 
-    if (!isNull(updateNoteContentTimer.current)) {
-      clearTimeout(updateNoteContentTimer.current);
-      updateNoteContentTimer.current = null;
-    }
+  // const updateNoteContentTimer = useRef(null);
 
-    // 设置笔记列表中的更新时间
-    const index = noteList.findIndex((item) => item.id === currentNoteId);
-    if (index > -1) {
-      const _noteList = cloneDeep(noteList);
-      _noteList[index].updateTime = new Date().getTime();
-      dispatch(setNoteList(_noteList));
-    }
+  // useEffect(() => {
+  //   if (currentNoteDetail?.content === value) {
+  //     return;
+  //   }
 
-    const noteId = currentNoteDetail?.id;
-    if (!isNull(noteId)) {
-      updateNoteContentTimer.current = setTimeout(() => {
-        window.api.updateNoteContent({noteId, content: value});
-        updateNoteContentTimer.current = null;
-      }, 500);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  //   if (!isNull(updateNoteContentTimer.current)) {
+  //     clearTimeout(updateNoteContentTimer.current);
+  //     updateNoteContentTimer.current = null;
+  //   }
+
+  //   const noteId = currentNoteDetail?.id;
+  //   if (!isNull(noteId)) {
+  //     updateNoteContentTimer.current = setTimeout(() => {
+  //       window.api.updateNoteContent({noteId, content: value});
+  //       updateNoteContentTimer.current = null;
+  //     }, 500);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [value]);
 
   /** 监听标题发生变化 */
   const onNoteTitleChange = useCallback(

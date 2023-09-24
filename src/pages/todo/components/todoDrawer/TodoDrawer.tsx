@@ -65,9 +65,6 @@ const TodoEditor = forwardRef((props, ref) => {
     };
   });
 
-  console.log('modules.current', modules.current);
-  console.log('formats.current', formats.current);
-
   return (
     <>
       <div className="todo-editor-container">

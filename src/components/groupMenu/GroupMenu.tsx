@@ -19,6 +19,7 @@ import {
 import cx from 'classnames';
 import {isNull, throttle} from 'lodash';
 import React, {useCallback, useEffect, useState} from 'react';
+import {BiDotsHorizontalRounded} from 'react-icons/bi';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import usePageType from 'src/hooks/usePageType';
 import {
@@ -271,7 +272,8 @@ const GroupMenu: React.FC = () => {
             arrow={{pointAtCenter: true}}
           >
             {/* <HolderOutlined className="menu-action-btn" /> */}
-            <EllipsisOutlined className="menu-action-btn" />
+            {/* <EllipsisOutlined className="menu-action-btn" /> */}
+            <BiDotsHorizontalRounded className="menu-action-btn" />
           </Dropdown>
         </div>,
         item.id.toString(),
@@ -353,6 +355,7 @@ const GroupMenu: React.FC = () => {
                   key="-4"
                   onClick={() => onClickMenuItem('-4')}
                 >
+                  {/* 笔记专栏的废纸篓 */}
                   <div className="group-menu-name">废纸篓</div>
                 </div>,
                 '-4',

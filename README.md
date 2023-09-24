@@ -41,3 +41,38 @@ export ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/" && rm -rf out 
 - [ ] 完成待办界面的开发，可进行计划的管理
 - [ ] appStore 发布 https://www.electronjs.org/zh/docs/latest/tutorial/mac-app-store-submission-guide
 - [ ] 使用 tailwindcss: https://tailwindcss.com/docs/installation
+
+
+
+# 如何制作应用图标？
+
+首先，可以在一些网站上去搜索免费图标，毕竟自己不会设计，常用的网站有：
+
+- [icons8](https://icons8.com/icons/set/todo)
+
+
+
+或者也可以使用 `schetch` 自己进行设计，并一键导出为 `icns` 格式的图标文件。
+
+
+
+那接下来的问题就是如何将上面网站中搜索到的 `png` icon 转换为 `icns` 格式？
+
+
+
+# 如何进行数据库升级？
+
+
+
+# 如何修改 mac toolbar 中的菜单选项？
+
+
+
+# 项目中的图标
+
+使用 https://react-icons.github.io/react-icons  进行图标配置。
+
+
+
+
+

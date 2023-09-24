@@ -120,14 +120,17 @@ const TodoList = () => {
     [dispatch, isTrash]
   );
 
-  const {run: queryTodoList} = useRequest(window.api.getTodoList, {
-    manual: true,
-    onSuccess: (res: any) => {
-      if (res?.result) {
-        setDatasource(res.result);
+  const {run: queryTodoList, loading: isTableLoading} = useRequest(
+    window.api.getTodoList,
+    {
+      manual: true,
+      onSuccess: (res: any) => {
+        if (res?.result) {
+          setDatasource(res.result);
+        }
       }
     }
-  });
+  );
 
   const getTodoList = useCallback(() => {
     queryTodoList({groupId: currentTodoGroupId});
@@ -879,7 +882,7 @@ const TodoList = () => {
         ></Alert>
       )}
 
-      <ConfigProvider renderEmpty={TableEmpty}>
+      <ConfigProvider>
         <Table
           rowSelection={rowSelection}
           columns={columns}
@@ -887,6 +890,7 @@ const TodoList = () => {
           dataSource={filteredDatasource}
           size="middle"
           pagination={false}
+          // loading={isTableLoading}
           scroll={{
             y: tableHeight
           }}
