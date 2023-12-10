@@ -43,6 +43,7 @@ import {
   toggleIsTodoDrawerOpened
 } from 'src/store/todos';
 import {TodoItem} from 'src/types';
+import {Priority} from 'src/utils/priority';
 import {
   convertGroupList,
   convertTimestampToDuration,
@@ -191,7 +192,7 @@ const TodoList = () => {
         getTodoList();
       }
     });
-  }, 500);
+  }, 0);
 
   // 监听确认选择截止时间
   const onConfirmSelectDeadline = useCallback(
@@ -266,16 +267,16 @@ const TodoList = () => {
         align: 'center',
         filters: [
           {
-            text: '紧急',
-            value: 0
+            text: Priority.highText,
+            value: Priority.high
           },
           {
-            text: '重要',
-            value: 1
+            text: Priority.middleText,
+            value: Priority.middle
           },
           {
-            text: '一般',
-            value: 2
+            text: Priority.lowText,
+            value: Priority.low
           }
         ],
         filterSearch: true,
@@ -283,22 +284,22 @@ const TodoList = () => {
           return record.priority === value;
         },
         render: (value: number, item: TodoItem) => {
+          const isHigh = Priority.isHigh(value);
+          const isMiddle = Priority.isMiddle(value);
           return isTrash ? (
             <Tag
               icon={
-                value === 0 ? (
+                isHigh ? (
                   <AlertOutlined />
-                ) : value === 1 ? (
+                ) : isMiddle ? (
                   <RocketOutlined />
                 ) : (
                   <CoffeeOutlined />
                 )
               }
-              color={
-                value === 0 ? 'error' : value === 1 ? 'warning' : 'default'
-              }
+              color={Priority.getColorTypeByValue(value)}
             >
-              {value === 0 ? '紧急' : value === 1 ? '重要' : '一般'}
+              {Priority.getTextByValue(value)}
             </Tag>
           ) : (
             <Popover
@@ -309,27 +310,36 @@ const TodoList = () => {
                   options={[
                     {
                       label: (
-                        <Tag icon={<CoffeeOutlined />} color="default">
-                          一般
+                        <Tag
+                          icon={<CoffeeOutlined />}
+                          color={Priority.lowColorType}
+                        >
+                          {Priority.lowText}
                         </Tag>
                       ),
-                      value: 2
+                      value: Priority.low
                     },
                     {
                       label: (
-                        <Tag icon={<RocketOutlined />} color="warning">
-                          重要
+                        <Tag
+                          icon={<RocketOutlined />}
+                          color={Priority.middleColorType}
+                        >
+                          {Priority.middleText}
                         </Tag>
                       ),
-                      value: 1
+                      value: Priority.middle
                     },
                     {
                       label: (
-                        <Tag icon={<AlertOutlined />} color="error">
-                          紧急
+                        <Tag
+                          icon={<AlertOutlined />}
+                          color={Priority.highColorType}
+                        >
+                          {Priority.highText}
                         </Tag>
                       ),
-                      value: 0
+                      value: Priority.high
                     }
                   ]}
                   onChange={(v: number) => {
@@ -399,7 +409,7 @@ const TodoList = () => {
               content={
                 <div className="progress-popover-container">
                   <Slider
-                    defaultValue={value}
+                    value={value}
                     onChange={(v: number) => onProgressChange(v, item.id)}
                   />
                 </div>
@@ -407,12 +417,28 @@ const TodoList = () => {
               title="设置进度"
               trigger="hover"
             >
-              <Progress
-                type="circle"
-                percent={value}
-                size={20}
-                showInfo={false}
-              />
+              <div
+                onClick={() => {
+                  if (value >= 0 && value < 50) {
+                    onProgressChange(50, item.id);
+                    return;
+                  }
+
+                  if (value >= 50 && value < 100) {
+                    onProgressChange(100, item.id);
+                    return;
+                  }
+
+                  onProgressChange(0, item.id);
+                }}
+              >
+                <Progress
+                  type="circle"
+                  percent={value}
+                  size={20}
+                  showInfo={false}
+                />
+              </div>
             </Popover>
           );
         }
@@ -895,10 +921,12 @@ const TodoList = () => {
             y: tableHeight
           }}
           rowClassName={(record) => {
+            let className = ['todo-item-row'];
             if (record.id === todoDetail.id) {
-              return 'selected-todo-item-row';
+              className = ['selected-todo-item-row'];
             }
-            return 'todo-item-row';
+            className.push(Priority.getRowClassNameByValue(record.priority));
+            return className.join(' ');
           }}
         />
       </ConfigProvider>
