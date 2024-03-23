@@ -1,10 +1,7 @@
 import './todoDrawer.less';
-import 'react-quill/dist/quill.snow.css';
-import 'quill-emoji/dist/quill-emoji.css';
 
-import {Drawer, DrawerProps, Input, notification} from 'antd';
+import {Drawer, DrawerProps, Input, message, notification} from 'antd';
 import {isNil} from 'lodash';
-import Emoji from 'quill-emoji';
 import React, {
   forwardRef,
   useCallback,
@@ -13,12 +10,9 @@ import React, {
   useRef,
   useState
 } from 'react';
-import ReactQuill, {Quill} from 'react-quill';
+import RichEditor from 'src/components/RichEditor';
 import {useAppDispatch, useAppSelector} from 'src/hooks/store';
 import {resetTodoDetail} from 'src/store/todos';
-import {quillFormats, quillModules} from 'src/utils/quill';
-
-// Quill.register('modules/emoji', Emoji);
 
 interface TodoDrawerProps {
   open: boolean;
@@ -30,56 +24,36 @@ interface TodoDrawerProps {
   onSwitchRight?: () => void;
 }
 
-const TodoEditor = forwardRef((props, ref) => {
-  const todoDetail = useAppSelector((state) => state.todos.todoDetail);
-  const [value, setValue] = useState('');
-  const modules = useRef(quillModules);
-  const formats = useRef(quillFormats);
+const TodoEditor = forwardRef<any, {
+  onSave: (content: string) => void;
+  onChange: (content: string) => void;
+  open: boolean;
+    }>((props, ref) => {
+      const todoDetail = useAppSelector((state) => state.todos.todoDetail);
+      const [value, setValue] = useState('');
 
-  const onEditorChange = useCallback((e) => {
-    setValue(e);
-  }, []);
+      useEffect(() => {
+        if (!isNil(todoDetail?.content)) {
+          setValue(todoDetail.content);
+        }
+      }, [todoDetail?.content]);
 
-  // 组件加载
-  useEffect(() => {
-    // 禁止拼音检查，导致出现红色波浪线
-    const quillNode = document.querySelector('.quill');
-    if (quillNode) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      quillNode.spellcheck = false;
-    }
-  }, []);
+      useImperativeHandle(ref, () => {
+        return {
+          getEditorContent: () => {
+            return value;
+          }
+        };
+      });
 
-  useEffect(() => {
-    if (!isNil(todoDetail?.content)) {
-      setValue(todoDetail.content);
-    }
-  }, [todoDetail?.content]);
-
-  useImperativeHandle(ref, () => {
-    return {
-      getEditorContent: () => {
-        return value;
-      }
-    };
-  });
-
-  return (
-    <>
-      <div className="todo-editor-container">
-        <ReactQuill
-          theme="snow"
-          value={value}
-          onChange={(e) => onEditorChange(e)}
-          modules={modules.current}
-          formats={formats.current}
-          placeholder="请输入待办内容"
-        />
-      </div>
-    </>
-  );
-});
+      return (
+        <>
+          <div className="todo-editor-container">
+            <RichEditor todoId={todoDetail.id} onSave={props.onSave} onChange={props.onChange} open={props.open}></RichEditor>
+          </div>
+        </>
+      );
+    });
 
 const TodoTitle = forwardRef((props, ref) => {
   const todoDetail = useAppSelector((state) => state.todos.todoDetail);
@@ -107,7 +81,7 @@ const TodoTitle = forwardRef((props, ref) => {
   return (
     <Input
       placeholder="请输入待办事项"
-      bordered={false}
+      variant="borderless"
       value={value}
       onChange={onChange}
       ref={inputRef}
@@ -125,6 +99,8 @@ const TodoDrawer = (props: TodoDrawerProps) => {
 
   const dispatch = useAppDispatch();
 
+  const todoContent = useRef('');
+
   const afterOpenChange = useCallback(
     (e) => {
       if (e === false) {
@@ -141,7 +117,7 @@ const TodoDrawer = (props: TodoDrawerProps) => {
       return;
     }
 
-    const content = todoEditorRef.current?.getEditorContent();
+    const content = todoContent.current;
     const title = todoTitleRef.current?.getTodoTitle();
 
     if (!title) {
@@ -170,28 +146,47 @@ const TodoDrawer = (props: TodoDrawerProps) => {
       });
   }, [onClose, todoDetail]);
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        (event.key === 's' || event.keyCode === 83)
-      ) {
-        event.preventDefault(); // 阻止默认的保存操作
-        onDrawerClose();
-      }
-    };
+  const onSave = (content: string) => {
+    if (closing.current) {
+      return;
+    }
 
-    document.addEventListener('keydown', handleKeyDown);
+    const title = todoTitleRef.current?.getTodoTitle();
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onDrawerClose]);
+    if (!title) {
+      notification.open({
+        message: '温馨提示',
+        description: '请输入待办事项标题',
+        placement: 'topLeft',
+        type: 'warning'
+      });
+      return;
+    }
+
+    closing.current = true;
+
+    window.api
+      .updateTodoDetail({
+        id: todoDetail.id,
+        name: title,
+        content
+      })
+      .then(() => {
+        onClose();
+      })
+      .finally(() => {
+        closing.current = false;
+      });
+  };
+
+  const onChange = (content: string) => {
+    todoContent.current = content;
+  };
 
   return (
     <Drawer
       placement={placement}
-      width={700}
+      width={720}
       onClose={onDrawerClose}
       open={open}
       autoFocus={true}
@@ -202,7 +197,7 @@ const TodoDrawer = (props: TodoDrawerProps) => {
       destroyOnClose={true}
       afterOpenChange={afterOpenChange}
     >
-      <TodoEditor ref={todoEditorRef} />
+      <TodoEditor ref={todoEditorRef} onSave={onSave} onChange={onChange} open={open} />
     </Drawer>
   );
 };

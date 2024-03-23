@@ -1,12 +1,7 @@
 import './noteEditor.less';
-import './quill-editor.less';
-import 'react-quill/dist/quill.snow.css';
-import 'quill-emoji/dist/quill-emoji.css';
 
 import {Input, message} from 'antd';
-import {cloneDeep, debounce, isNil, isNull} from 'lodash';
-import Quill from 'quill';
-import * as Emoji from 'quill-emoji';
+import {cloneDeep, isNil} from 'lodash';
 import React, {
   useCallback,
   useEffect,
@@ -14,12 +9,11 @@ import React, {
   useRef,
   useState
 } from 'react';
-import ReactQuill from 'react-quill';
 import {useDispatch} from 'react-redux';
+import RichEditor from 'src/components/RichEditor';
 import {useAppSelector} from 'src/hooks/store';
+import {store} from 'src/store';
 import {setCurrentNoteDetail, setNoteList} from 'src/store/notes';
-import {quillFormats, quillModules} from 'src/utils/quill';
-Quill.register('modules/emoji', Emoji);
 
 const NoteEditor: React.FC = React.memo(() => {
   const currentNoteId = useAppSelector((state) => state.notes.currentNoteId);
@@ -31,9 +25,6 @@ const NoteEditor: React.FC = React.memo(() => {
   );
   const noteList = useAppSelector((state) => state.notes.noteList);
   const dispatch = useDispatch();
-
-  const modules = useRef(quillModules);
-  const formats = useRef(quillFormats);
 
   // 是否为废纸篓界面
   const isTrash = useMemo(() => {
@@ -51,61 +42,6 @@ const NoteEditor: React.FC = React.memo(() => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentNoteDetail?.id]);
-
-  // 组件加载
-  useEffect(() => {
-    // 禁止拼音检查，导致出现红色波浪线
-    const quillNode = document.querySelector('.quill');
-    if (quillNode) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      quillNode.spellcheck = false;
-    }
-  }, []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onEditorChange = useCallback(
-    debounce((e) => {
-      // 更新当前编辑器的内容
-      setValue(e);
-
-      // 设置笔记列表中的更新时间
-      // 设置笔记列表中的更新时间
-      const index = noteList.findIndex((item) => item.id === currentNoteId);
-      if (index > -1) {
-        const _noteList = cloneDeep(noteList);
-        _noteList[index].updateTime = new Date().getTime();
-        dispatch(setNoteList(_noteList));
-      }
-
-      // 调用接口进行内容更新
-      const noteId = currentNoteDetail?.id;
-      window.api.updateNoteContent({noteId, content: e});
-    }, 500),
-    [currentNoteDetail?.id]
-  );
-
-  // const updateNoteContentTimer = useRef(null);
-
-  // useEffect(() => {
-  //   if (currentNoteDetail?.content === value) {
-  //     return;
-  //   }
-
-  //   if (!isNull(updateNoteContentTimer.current)) {
-  //     clearTimeout(updateNoteContentTimer.current);
-  //     updateNoteContentTimer.current = null;
-  //   }
-
-  //   const noteId = currentNoteDetail?.id;
-  //   if (!isNull(noteId)) {
-  //     updateNoteContentTimer.current = setTimeout(() => {
-  //       window.api.updateNoteContent({noteId, content: value});
-  //       updateNoteContentTimer.current = null;
-  //     }, 500);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [value]);
 
   /** 监听标题发生变化 */
   const onNoteTitleChange = useCallback(
@@ -165,22 +101,14 @@ const NoteEditor: React.FC = React.memo(() => {
           <Input
             className="note-title"
             placeholder="请输入笔记标题"
-            bordered={false}
+            variant="borderless"
             value={currentNoteDetail?.title}
             onChange={onNoteTitleChange}
             disabled={isTrash}
           ></Input>
         </div>
       ) : null}
-      <ReactQuill
-        theme="snow"
-        value={value}
-        onChange={(e) => onEditorChange(e)}
-        modules={modules.current}
-        formats={formats.current}
-        placeholder="请输入笔记内容"
-        readOnly={isTrash}
-      />
+      <RichEditor noteId={store.getState().notes.currentNoteId}></RichEditor>
     </div>
   );
 });

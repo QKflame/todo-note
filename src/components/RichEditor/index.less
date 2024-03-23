@@ -1,0 +1,28 @@
+.rich-editor-container {
+  position: absolute;
+  height: calc(100% - 40px);
+  top: 40px;
+  overflow-x: hidden;
+  width: calc(100% - 40px);
+
+  .bf-controlbar {
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  .bf-content {
+    height: calc(100% - 100px);
+    box-sizing: border-box;
+  }
+}
+
+.todo-editor-container {
+  .rich-editor-container {
+    top: 80px;
+    height: calc(100% - 80px);
+
+    .bf-content {
+      height: calc(100% - 160px);
+    }
+  }
+}

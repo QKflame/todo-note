@@ -10,5 +10,5 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
   },
-  "cSpell.words": ["Rowid"]
+  "cSpell.words": ["braft", "Rowid"]
 }
