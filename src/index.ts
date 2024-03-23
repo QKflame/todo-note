@@ -24,10 +24,12 @@ const createWindow = (): void => {
     }
   });
 
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    event.preventDefault(); // 阻止默认导航行为
-    shell.openExternal(url); // 使用默认浏览器打开链接
-  });
+  if (process.env.NODE_ENV !== 'development') {
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+      event.preventDefault(); // 阻止默认导航行为
+      shell.openExternal(url); // 使用默认浏览器打开链接
+    });
+  }
 
   mainWindow.maximize();
 
