@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
+    "make": "rm -rf out && electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
@@ -60,6 +60,7 @@
     "ahooks": "^3.7.7",
     "antd": "^5.4.0",
     "better-sqlite3": "^8.3.0",
+    "braft-editor": "^2.3.9",
     "classnames": "^2.3.2",
     "dayjs": "^1.11.8",
     "electron-squirrel-startup": "^1.0.0",
@@ -76,6 +77,8 @@
     "react-quill": "^2.0.0",
     "react-redux": "^8.0.7",
     "react-router-dom": "^6.10.0",
-    "redux": "^4.2.1"
+    "redux": "^4.2.1",
+    "slate": "^0.102.0",
+    "slate-react": "^0.102.0"
   }
 }
