@@ -12,6 +12,8 @@ export enum MenuType {
   Todo = 'todo',
   /** 我的笔记 */
   Note = 'note',
-  /** 密码箱 */
-  Password = 'password'
+  /** 密码本 */
+  Password = 'password',
+  /** 工具箱 */
+  Tools = 'tools'
 }

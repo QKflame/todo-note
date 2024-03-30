@@ -45,5 +45,13 @@ export const rules: Required<ModuleOptions>['rules'] = [
         }
       }
     ]
+  },
+  {
+    test: /\.png$/,
+    use: [
+      {
+        loader: 'url-loader'
+      }
+    ]
   }
 ];

@@ -7,6 +7,7 @@ import {translationsForLocale} from 'src/locales';
 
 import Note from './note/Note';
 import Todo from './todo/Todo';
+import Tools from './tools/Tools';
 
 const App = memo(() => {
   const locale = useAppSelector((state) => state.i18n.locale);
@@ -28,6 +29,7 @@ const App = memo(() => {
           <Route path="/" element={<Todo />}></Route>
           <Route path="todo" element={<Todo />}></Route>
           <Route path="note" element={<Note />}></Route>
+          <Route path="tools" element={<Tools />}></Route>
         </Routes>
       </div>
     </IntlProvider>

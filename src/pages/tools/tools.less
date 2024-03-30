@@ -1,0 +1,163 @@
+.tools-page-container {
+  padding: 20px;
+
+  .segmented-container {
+    margin-bottom: 14px !important;
+
+    .ant-segmented-item-label {
+      padding: 2px 30px !important;
+      user-select: none;
+    }
+  }
+
+  .empty-container {
+    .ant-empty-description {
+      color: #666;
+    }
+  }
+
+  .tools-container {
+    display: flex;
+    align-items: stretch;
+    font-size: 14px;
+    gap: 20px;
+    flex-wrap: wrap;
+    user-select: none;
+  }
+
+  .tool-container {
+    position: relative;
+    padding: 15px 20px;
+    border: 1px solid #f2f2f2;
+    border-radius: 4px;
+    width: 320px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.15s linear;
+    flex-shrink: 0;
+    min-width: 280px;
+    flex: 20%;
+    max-width: calc(25% - 20px);
+    // box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.03);
+    // transition: box-shadow 0.3s ease-in-out;
+
+    &:hover {
+      border-color: #e9f4fe;
+      transform: scale(1.01);
+      transition: all 0.15s linear;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      .tool-avatar {
+        img {
+          width: 32px;
+          height: 32px;
+          margin-right: 20px;
+        }
+      }
+
+      .tool-title-collect-container {
+        .tool-title {
+          font-size: 14px;
+          color: #333;
+          margin-bottom: 10px;
+          font-weight: 500;
+        }
+
+        .tool-collect-container {
+          display: flex;
+          align-items: center;
+          font-size: 12px;
+          color: #555;
+
+          .collect-icon-container {
+            display: flex;
+            align-items: center;
+          }
+
+          svg {
+            margin-right: 2px;
+          }
+        }
+      }
+    }
+
+    .tool-desc {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #444;
+    }
+  }
+
+  .timestamp-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(215, 90, 87, 0.05), #fff);
+    }
+  }
+
+  .calculator-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(95, 199, 105, 0.1), #fff);
+    }
+  }
+
+  .encryption-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(68, 142, 247, 0.07), #fff);
+    }
+  }
+
+  .colorConverter-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(107, 182, 164, 0.1), #fff);
+    }
+  }
+
+  .digitSystemConverter-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(75, 67, 111, 0.1), #fff);
+    }
+  }
+
+  .palette-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(246, 219, 172, 0.1), #fff);
+    }
+  }
+
+  .CNYCapitalizationConverter-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(234, 61, 71, 0.05), #fff);
+    }
+  }
+
+  .ZhouYi-tool-container {
+    &:hover {
+      background: linear-gradient(rgba(9, 9, 9, 0.1), #fff);
+    }
+  }
+}
+
+.tool-drawer-container {
+  .ant-drawer-close {
+    position: absolute;
+    right: 10px;
+
+    .close {
+      white-space: nowrap;
+    }
+  }
+}
+
+.tool-drawer-title-container {
+  display: flex;
+  align-items: center;
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+}
