@@ -98,7 +98,7 @@ export const tools: Tool[] = [
   },
   {
     key: ToolKeys.ZhouYi,
-    title: '周易',
+    title: '易经',
     description: '学习了解中华传统文化，辩证看待世间事物发展规律。',
     icon: ZhouyiPNG
   }
