@@ -1,10 +1,14 @@
 import './tools.less';
+import './tool.common.less';
 
 import {ProductOutlined, StarOutlined} from '@ant-design/icons';
 import {Drawer, Empty, Segmented} from 'antd';
 import cx from 'classnames';
 import React, {memo, useCallback, useMemo, useState} from "react";
 
+import ColorConverter from './components/ColorConverter';
+import DigitSystemConverter from './components/DigitSystemConverter';
+import Palette from './components/Palette';
 import Timestamp from './components/Timestamp';
 import {Tool, ToolKeys, tools} from "./config";
 
@@ -88,8 +92,18 @@ const Tools: React.FC = memo(() => {
   }, []);
 
   const renderTool = useCallback(() => {
-    if (currentSelectedTool?.key === ToolKeys.Timestamp) {
+    const key = currentSelectedTool?.key;
+    if (key === ToolKeys.Timestamp) {
       return <Timestamp></Timestamp>;
+    }
+    if (key === ToolKeys.ColorConverter) {
+      return <ColorConverter></ColorConverter>;
+    }
+    if (key === ToolKeys.Palette) {
+      return <Palette></Palette>;
+    }
+    if (key === ToolKeys.DigitSystemConverter) {
+      return <DigitSystemConverter></DigitSystemConverter>;
     }
   }, [currentSelectedTool?.key]);
 
