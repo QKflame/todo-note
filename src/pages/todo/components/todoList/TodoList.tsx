@@ -221,7 +221,7 @@ const TodoList = () => {
     [getTodoList]
   );
 
-  const columns: ColumnsType<TodoItem> = useMemo(
+  const columns: any= useMemo(
     () => [
       {
         title: '事项',

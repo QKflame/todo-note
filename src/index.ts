@@ -20,8 +20,7 @@ const createWindow = (): void => {
     icon: path.join(__dirname, './assets/logo.ico'),
     webPreferences: {
       devTools: process.env.NODE_ENV === 'development',
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      hardwareAcceleration: true
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
     }
   });
 

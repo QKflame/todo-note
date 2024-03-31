@@ -62,9 +62,10 @@ const Tools: React.FC = memo(() => {
 
   const onSegmentTypeChange = useCallback((e: any) => {
     setSegmentType(e);
+    localStorage.setItem('TOOLS_SEGMENT_TYPE', e);
   }, []);
 
-  const [segmentType, setSegmentType] = useState('all');
+  const [segmentType, setSegmentType] = useState(localStorage.getItem('TOOLS_SEGMENT_TYPE') || 'all');
   const [collectTypes, setCollectTypes] = useState(collectStorage.getTypes());
   const [currentSelectedTool, setCurrentSelectedTool] = useState<Tool>(null);
   const [isToolDrawerOpen, setIsToolDrawerOpen] = useState(false);
