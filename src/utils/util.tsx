@@ -136,3 +136,7 @@ export function formatTodoDeadline(timestamp: null | number) {
   const expiredDays = Math.ceil(Math.abs(difference) / (1000 * 60 * 60 * 24));
   return <span style={{color: '#f5222d'}}>过期 {expiredDays} 天</span>;
 }
+
+export function copyText(text: string) {
+  navigator.clipboard.writeText(text.toString());
+}

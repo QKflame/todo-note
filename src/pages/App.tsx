@@ -24,6 +24,7 @@ const App = memo(() => {
         style={{
           height: `calc(100vh - ${headerHeight} - ${headerMarginBottom})`
         }}
+        spellCheck={false}
       >
         <Routes>
           <Route path="/" element={<Todo />}></Route>

@@ -63,6 +63,7 @@
     "better-sqlite3": "^8.3.0",
     "braft-editor": "^2.3.9",
     "classnames": "^2.3.2",
+    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.8",
     "electron-squirrel-startup": "^1.0.0",
     "lodash": "^4.17.21",

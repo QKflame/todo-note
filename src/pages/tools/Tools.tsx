@@ -6,10 +6,15 @@ import {Drawer, Empty, Segmented} from 'antd';
 import cx from 'classnames';
 import React, {memo, useCallback, useMemo, useState} from "react";
 
+import Base64 from './components/Base64';
 import ColorConverter from './components/ColorConverter';
 import DigitSystemConverter from './components/DigitSystemConverter';
+import Encryption from './components/Encryption';
 import Palette from './components/Palette';
+import PasswordGenerator from './components/PasswordGenerator';
 import Timestamp from './components/Timestamp';
+import UrlEncode from './components/UrlEncode';
+import WordCount from './components/WordCount';
 import {Tool, ToolKeys, tools} from "./config";
 
 class CollectStorage {
@@ -105,6 +110,21 @@ const Tools: React.FC = memo(() => {
     }
     if (key === ToolKeys.DigitSystemConverter) {
       return <DigitSystemConverter></DigitSystemConverter>;
+    }
+    if (key === ToolKeys.Encryption) {
+      return <Encryption></Encryption>;
+    }
+    if (key === ToolKeys.Base64) {
+      return <Base64></Base64>;
+    }
+    if (key === ToolKeys.URLEncode) {
+      return <UrlEncode></UrlEncode>;
+    }
+    if (key === ToolKeys.PasswordGenerator) {
+      return <PasswordGenerator></PasswordGenerator>;
+    }
+    if (key === ToolKeys.WordCount) {
+      return <WordCount></WordCount>;
     }
   }, [currentSelectedTool?.key]);
 

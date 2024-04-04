@@ -1,29 +1,27 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import Base64PNG from '../../assets/pngs/base64.png';
 import CalculatorPNG from '../../assets/pngs/calculator.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import CNYPNG from '../../assets/pngs/CNY.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import ColorConverterPNG from '../../assets/pngs/colorConverter.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import DigitSystemConverterPNG from '../../assets/pngs/digitSystemConverter.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import EncryptionPNG from '../../assets/pngs/encryption.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import EnglishStyleConversionPNG from '../../assets/pngs/englishStyleConversion.png';
 import PalettePNG from '../../assets/pngs/palette.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import PasswordGeneratorPNG from '../../assets/pngs/passwordGenerator.png';
 import TimestampPNG from '../../assets/pngs/timestamp.png';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import URLEncodePNG from '../../assets/pngs/urlencode.png';
+import WordCountPNG from '../../assets/pngs/wordCount.png';
 import ZhouyiPNG from '../../assets/pngs/Zhouyi.png';
 
-export enum ToolKeys  {
+
+
+
+
+
+
+
+
+
+export enum ToolKeys {
   /** 时间戳转换 */
   Timestamp = 'timestamp',
   /** 计算器 */
@@ -39,7 +37,12 @@ export enum ToolKeys  {
   /** 人民币大写转换器 */
   CNYCapitalizationConverter = 'CNYCapitalizationConverter',
   /** 周易 */
-  ZhouYi = 'ZhouYi'
+  ZhouYi = 'ZhouYi',
+  Base64 = "Base64",
+  EnglishStyleConversion = "EnglishStyleConversion",
+  PasswordGenerator = "PasswordGenerator",
+  WordCount = "WordCount",
+  URLEncode = "URLEncode"
 }
 
 export interface Tool {
@@ -75,7 +78,7 @@ export const tools: Tool[] = [
   {
     key: ToolKeys.ColorConverter,
     title: '颜色转换',
-    description: '颜色转换',
+    description: '支持 RGB 颜色值和十六进制颜色码互相转换。',
     icon: ColorConverterPNG
   },
   {
@@ -87,7 +90,7 @@ export const tools: Tool[] = [
   {
     key: ToolKeys.Palette,
     title: '调色盘',
-    description: '调色盘',
+    description: '可视化选择和对比多种颜色，快速定制配色方案。',
     icon: PalettePNG
   },
   {
@@ -96,10 +99,40 @@ export const tools: Tool[] = [
     description: '人民币大写转换器',
     icon: CNYPNG
   },
+  // {
+  //   key: ToolKeys.ZhouYi,
+  //   title: '易经',
+  //   description: '学习了解中华传统文化，辩证看待世间事物发展规律。',
+  //   icon: ZhouyiPNG
+  // },
   {
-    key: ToolKeys.ZhouYi,
-    title: '易经',
-    description: '学习了解中华传统文化，辩证看待世间事物发展规律。',
-    icon: ZhouyiPNG
+    key: ToolKeys.URLEncode,
+    title: 'UrlEncode 编解码',
+    description: '支持 utf-8 文本内容的 URL Encode、Decode。',
+    icon: URLEncodePNG
+  },
+  {
+    key: ToolKeys.Base64,
+    title: 'Base64 编解码',
+    description: '支持对文本内容进行 Base64 编码和解码操作。',
+    icon: Base64PNG
+  },
+  {
+    key: ToolKeys.EnglishStyleConversion,
+    title: '英文格式转换',
+    description: '支持大小写、驼峰、中划线、下划线、空格等格式转换。',
+    icon: EnglishStyleConversionPNG
+  },
+  {
+    key: ToolKeys.PasswordGenerator,
+    title: '随机密码生成器',
+    description: '根据不同规则任意搭配，自定义生成随机密码。',
+    icon: PasswordGeneratorPNG
+  },
+  {
+    key: ToolKeys.WordCount,
+    title: '字数统计工具',
+    description: '统计文本内容中的中英文字符、标点符号、空格等数据。',
+    icon: WordCountPNG
   }
 ];
