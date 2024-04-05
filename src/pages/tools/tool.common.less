@@ -156,10 +156,10 @@
 .word-count-tool-operation-container {
   .table {
     .row {
-      height: 32px;
+      height: 38px;
 
       .cell {
-        line-height: 32px;
+        line-height: 38px;
       }
     }
   }
@@ -204,6 +204,54 @@
     padding-inline-start: 20px;
     li {
       text-indent: 10px;
+    }
+  }
+}
+
+.convert-btns-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  .convert-btn-item {
+    background-color: #5c6bc0;
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background-color: #7986cb;
+    }
+
+    &:active {
+      background-color: #5c6bc0;
+    }
+  }
+
+  .clear-btn {
+    background-color: #ef5350;
+
+    &:hover {
+      background-color: #e57373;
+    }
+
+    &:active {
+      background-color: #ef5350;
+    }
+  }
+
+  .copy-btn {
+    background-color: #66bb6a;
+
+    &:hover {
+      background-color: #81c784;
+    }
+
+    &:active {
+      background-color: #66bb6a;
     }
   }
 }

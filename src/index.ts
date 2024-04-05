@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, shell} from 'electron';
+import {app, BrowserWindow, ipcMain, Menu,shell} from 'electron';
 import fs from 'fs';
 import path from 'path';
 import * as noteApis from 'src/apis/note.api';
@@ -30,6 +30,28 @@ const createWindow = (): void => {
       shell.openExternal(url); // 使用默认浏览器打开链接
     });
   }
+
+  const template: any = [
+    {
+      label: 'Window',
+      submenu: [
+        {
+          label: 'Always on Top',
+          type: 'checkbox',
+          checked: false,
+          click: function(item) {
+            mainWindow.setAlwaysOnTop(item.checked);
+          }
+        },
+        {type: 'separator'},
+        {role: 'minimize'},
+        {role: 'close'}
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 
   mainWindow.maximize();
 

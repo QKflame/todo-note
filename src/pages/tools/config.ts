@@ -66,13 +66,13 @@ export const tools: Tool[] = [
   {
     key: ToolKeys.Calculator,
     title: '计算器',
-    description: '计算器',
+    description: '进行基本数学计算，支持语音朗读。',
     icon: CalculatorPNG
   },
   {
     key: ToolKeys.Encryption,
     title: '加密工具',
-    description: '加密工具',
+    description: '支持 AES/DES/RC4/Rabbit/TripleDes 多种加密算法。',
     icon: EncryptionPNG
   },
   {
@@ -96,7 +96,7 @@ export const tools: Tool[] = [
   {
     key: ToolKeys.CNYCapitalizationConverter,
     title: '人民币大写转换器',
-    description: '人民币大写转换器',
+    description: '将阿拉伯数字转换为大写汉字货币形式，支持角、分。',
     icon: CNYPNG
   },
   // {

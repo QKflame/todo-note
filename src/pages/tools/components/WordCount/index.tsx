@@ -29,6 +29,7 @@ function calculateTextMetrics(text): Metrics {
   const chineseRegExp = /[\u4E00-\u9FA5]/g;
   const englishWordRegExp = /[a-zA-Z]+/g;
   const englishLetterRegExp = /[a-zA-Z]/g;
+  // eslint-disable-next-line no-useless-escape
   const punctuationRegExp = /[.,\/#!$%\^&\*;:{}=\-_`~()，。！￥…（）【】；：‘“’”、？《》]/g;
   const numberRegExp = /\d/g;
   const spaceRegExp = /\s/g;

@@ -7,9 +7,12 @@ import cx from 'classnames';
 import React, {memo, useCallback, useMemo, useState} from "react";
 
 import Base64 from './components/Base64';
+import Calculator from './components/Calculator';
+import CNYCapitalizationConverter from './components/CNYCapitalizationConverter';
 import ColorConverter from './components/ColorConverter';
 import DigitSystemConverter from './components/DigitSystemConverter';
 import Encryption from './components/Encryption';
+import EnglishStyleConversion from './components/EnglishStyleConversion';
 import Palette from './components/Palette';
 import PasswordGenerator from './components/PasswordGenerator';
 import Timestamp from './components/Timestamp';
@@ -125,6 +128,15 @@ const Tools: React.FC = memo(() => {
     }
     if (key === ToolKeys.WordCount) {
       return <WordCount></WordCount>;
+    }
+    if (key === ToolKeys.CNYCapitalizationConverter) {
+      return <CNYCapitalizationConverter></CNYCapitalizationConverter>;
+    }
+    if (key === ToolKeys.EnglishStyleConversion) {
+      return <EnglishStyleConversion></EnglishStyleConversion>;
+    }
+    if (key === ToolKeys.Calculator) {
+      return <Calculator></Calculator>;
     }
   }, [currentSelectedTool?.key]);
 
