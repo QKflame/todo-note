@@ -74,7 +74,7 @@ const WordCount: React.FC = () => {
       <div className="converter-row">
         <div className="converter-item full-convert-item">
           <div className="label">源文本：</div>
-          <TextArea rows={12} placeholder="请输入源文本内容" value={sourceText} onChange={onSourceTextChange}/>
+          <TextArea rows={12} placeholder="请输入源文本内容" value={sourceText} onChange={onSourceTextChange} spellCheck={false}/>
         </div>
       </div>
 

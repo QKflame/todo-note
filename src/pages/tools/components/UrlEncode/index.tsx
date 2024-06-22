@@ -56,14 +56,14 @@ const UrlEncode: React.FC = () => {
       <div className="converter-row">
         <div className="converter-item full-convert-item">
           <div className="label">源文本：</div>
-          <TextArea rows={4} placeholder="请输入源文本内容" value={sourceText} onChange={onSourceTextChange}/>
+          <TextArea rows={4} placeholder="请输入源文本内容" value={sourceText} onChange={onSourceTextChange} spellCheck={false}/>
         </div>
       </div>
 
       <div className="converter-row">
         <div className="converter-item full-convert-item">
           <div className="label">编/解码结果：</div>
-          <TextArea rows={4} placeholder="此处显示编解码结果" value={result} onClick={onClickResult}/>
+          <TextArea rows={4} placeholder="此处显示编解码结果" value={result} onClick={onClickResult} spellCheck={false}/>
         </div>
       </div>
 
