@@ -61,6 +61,8 @@ const TableEmpty = () => (
   />
 );
 
+const defaultPageSize = 20;
+
 const TodoList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [datasource, setDatasource] = useState<Array<TodoItem>>([]);
@@ -69,6 +71,13 @@ const TodoList = () => {
   const [batchRemoveOpened, setBatchRemoveOpened] = useState(false);
 
   const [batchRemoveForm] = Form.useForm();
+
+  /** 当前页面 */
+  const [pageNo, setPageNo] = useState<number>(1);
+  /** 当前页面大小 */
+  const [pageSize, setPageSize] = useState<number>(defaultPageSize);
+  /** 当前总数 */
+  const [total, setTotal] = useState<number>(0);
 
   // 只显示未完成
   const onlyShowUnfinishedChecked = useAppSelector(
@@ -915,7 +924,16 @@ const TodoList = () => {
           rowKey="id"
           dataSource={filteredDatasource}
           size="middle"
-          pagination={false}
+          pagination={{
+            // current: pageNo,
+            hideOnSinglePage: true,
+            // pageSize,
+            defaultPageSize: 20,
+            showSizeChanger: true,
+            showTotal(total) {
+              return `共${total}条`;
+            },
+          }}
           // loading={isTableLoading}
           scroll={{
             y: tableHeight
