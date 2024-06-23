@@ -5,9 +5,11 @@ import 'braft-editor/dist/index.css';
 import {message} from 'antd';
 // https://braft.margox.cn/
 // 引入编辑器组件
-import BraftEditor from 'braft-editor';
+import BraftEditor, {EditorState} from 'braft-editor';
+import {debounce} from 'lodash';
 import {nanoid} from 'nanoid';
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {isEmptyValue} from 'src/utils/util';
 
 interface Props {
   noteId?: string;
@@ -17,106 +19,114 @@ interface Props {
   open?: boolean;
 }
 
-export default class RichEditor extends React.Component<Props> {
-  state = {
-    // 创建一个空的editorState作为初始值
-    editorState: BraftEditor.createEditorState(null)
-  };
+const RichEditor: React.FC<Props> = (props) => {
+  const {open, todoId, onChange, noteId, onSave} = props;
 
-  async componentDidMount () {
-    if (this.props.open) {
+  /** 编辑器的值 */
+  const [editorState, setEditorState] = useState<EditorState>(BraftEditor.createEditorState(null));
+
+  /** 消息 Key */
+  const messageKey = useRef('');
+
+  /** 是否正在保存 */
+  const isSaving = useRef(false);
+
+  /** 是否已经更新 */
+  const isUpdated = useRef(false);
+
+  useEffect(() => {
+    if (open && !isEmptyValue(todoId)) {
       window.api.getTodoDetail({
-        id: this.props.todoId
+        id: todoId
       }).then(res => {
-        this.props.onChange?.(res?.content || null);
-        this.setState({
-          editorState: BraftEditor.createEditorState(res?.content || null)
-        });
+        onChange?.(res?.content || null);
+        setEditorState(BraftEditor.createEditorState(res?.content || null));
       });
     }
-  }
+  }, [onChange, open, todoId]);
 
-  componentWillUpdate(prevProps: Readonly<Props>): void {
-    if (prevProps.noteId !== this.props.noteId && this.props.noteId !== '') {
+  useEffect(() => {
+    if (!isEmptyValue(noteId)) {
       window.api.getNoteDetail({
-        noteId: this.props.noteId
+        noteId
       }).then(res => {
-        this.props.onChange?.(res?.result?.content || null);
-        this.setState({
-          editorState: BraftEditor.createEditorState(res?.result?.content || null)
-        });
+        setEditorState(BraftEditor.createEditorState(res?.result?.content || null));
       });
-
     }
+  }, [noteId]);
 
-    // if (this.props.todoId && this.props.todoId !== '') {
-    //   window.api.getTodoDetail({
-    //     id: this.props.todoId
-    //   }).then(res => {
-    //     console.log('🛺 e3c8a6-Log-Info: res', res);
-    //     this.props.onChange?.(res?.result?.content || null);
-    //     this.setState({
-    //       editorState: BraftEditor.createEditorState(res?.result?.content || null)
-    //     });
-    //   });
-    // }
-  }
+  const saveInterval = useRef(null);
 
-  messageKey = '';
-  isSaving = false;
-
-  submitContent = async () => {
+  const submitContent = useCallback((ignoreMessage = false) => {
     // 处理笔记内容的保存
-    if (this.props.noteId) {
-      if (this.isSaving) {
+    if (!isEmptyValue(noteId)) {
+      if (isSaving.current) {
         return;
       }
 
-      const htmlContent = this.state.editorState.toHTML();
+      const htmlContent = editorState.toHTML();
 
-      this.isSaving = true;
+      isSaving.current = true;
 
       window.api.updateNoteContent({
-        noteId: this.props.noteId,
+        noteId,
         content: htmlContent
       }).then(() => {
-        if (this.messageKey) {
-          message.destroy(this.messageKey);
+        if (messageKey.current) {
+          message.destroy(messageKey.current);
         }
 
-        this.messageKey = nanoid();
+        messageKey.current = nanoid();
 
-        message.success({
-          key: this.messageKey,
-          content: '保存成功'
-        });
+        if (!ignoreMessage) {
+          message.success({
+            key: messageKey.current,
+            content: '保存成功'
+          });
+        }
+
+        isUpdated.current = false;
+
       }).finally(() => {
-        this.isSaving = false;
+        isSaving.current = false;
       });
-      return;
     }
 
-    // 处理待办相关的保存逻辑
-    this.props.onSave(this.state.editorState.toHTML());
-  };
+    // 处理待办内容的保存
+    if (!isEmptyValue(todoId) && open) {
+      onSave(editorState.toHTML());
+    }
+  }, [editorState, noteId, onSave, open, todoId]);
 
-  handleEditorChange = (editorState) => {
-    this.setState({editorState});
-    this.props.onChange?.(this.state.editorState.toHTML());
-  };
+  useEffect(() => {
+    saveInterval.current = setInterval(() => {
+      if (isUpdated.current) {
+        submitContent(true);
+      }
+    }, 500);
 
-  render () {
-    const {editorState} = this.state;
-    return (
-      <div className="rich-editor-container">
-        <BraftEditor
-          value={editorState}
-          onChange={this.handleEditorChange}
-          onSave={this.submitContent}
-          excludeControls={['media']}
-        />
-      </div>
-    );
+    return () => {
+      clearInterval(saveInterval.current);
+    };
+  }, [submitContent]);
 
-  }
-}
+  const handleEditorChange = useCallback((value) => {
+    isUpdated.current = true;
+    setEditorState(value);
+    onChange?.(value.toHTML());
+  }, [onChange]);
+
+
+  return (
+    <div className="rich-editor-container">
+      <BraftEditor
+        value={editorState}
+        onChange={handleEditorChange}
+        onSave={submitContent}
+        excludeControls={['media']}
+      />
+    </div>
+  );
+};
+
+export default RichEditor;

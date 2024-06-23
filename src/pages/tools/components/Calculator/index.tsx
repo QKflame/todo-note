@@ -163,6 +163,9 @@ const Calculator: React.FC = () => {
     }
     try {
       const ret = calculateExpression(content, typeof _precision === 'number' ? _precision : precision);
+      if (!/^-?\d+(\.\d+)?$/.test(ret)) {
+        throw new Error();
+      }
       setResult(ret);
       calcStorage.add(content, ret);
       setHistory(calcStorage.get());

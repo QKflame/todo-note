@@ -140,3 +140,12 @@ export function formatTodoDeadline(timestamp: null | number) {
 export function copyText(text: string) {
   navigator.clipboard.writeText(text.toString());
 }
+
+
+/** 判断是否为空值 */
+export function isEmptyValue(value) {
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  return value === null || value === undefined || value === '';
+}
