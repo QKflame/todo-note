@@ -149,3 +149,9 @@ export function isEmptyValue(value) {
   }
   return value === null || value === undefined || value === '';
 }
+
+
+/** 判断笔记是否为处于废纸篓页面 */
+export function isNoteTrashGroup(groupId: string | number) {
+  return groupId && groupId.toString() === '-4';
+}

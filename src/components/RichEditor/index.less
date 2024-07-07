@@ -13,6 +13,19 @@
   .bf-content {
     height: calc(100% - 100px);
     box-sizing: border-box;
+
+    &::-webkit-scrollbar {
+      width: 8px; /* 滚动条的宽度 */
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1; /* 滚动条轨道的背景颜色 */
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #e2e2e2; /* 滚动条滑块的背景颜色 */
+      border-radius: 10px; /* 滑块的圆角 */
+    }
   }
 }
 

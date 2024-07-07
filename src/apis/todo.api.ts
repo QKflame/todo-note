@@ -173,7 +173,7 @@ export async function batchRecoverTodo(db: Database, event, params) {
 
       const groupDetail = getGroupDetailStatement.get(groupId) as GroupItem;
       // 分组未被删除
-      if (!groupDetail.deleteTime) {
+      if (!groupDetail?.deleteTime) {
         cachedGroupIds[todoDetail.groupId] = 1;
         updateTodoStatement.run(groupId, todoId);
         return;

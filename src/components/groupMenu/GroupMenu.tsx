@@ -145,7 +145,7 @@ const GroupMenu: React.FC = () => {
           <div>
             <div style={{marginBottom: 10}}>是否确认删除当前分组？</div>
             <Alert
-              message="当前分组下的待办事项也将被删除，可前往废纸篓进行恢复！"
+              message={isNote ? "当前分组下的笔记也将被删除，可前往废纸篓进行恢复！" : "当前分组下的待办事项也将被删除，可前往废纸篓进行恢复！"}
               type="error"
             ></Alert>
           </div>

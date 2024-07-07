@@ -37,10 +37,6 @@ export default class RichEditor extends React.Component<Props> {
   }
 
   componentWillUpdate(prevProps: Readonly<Props>): void {
-    console.group("g1");
-    console.log('🛺 dcc91d-Log-Info', prevProps.noteId);
-    console.log('🛺 316e18-Log-Info', this.props.noteId);
-    console.groupEnd();
     if (prevProps.noteId !== this.props.noteId && this.props.noteId !== '') {
       window.api.getNoteDetail({
         noteId: this.props.noteId

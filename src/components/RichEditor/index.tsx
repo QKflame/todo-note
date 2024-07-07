@@ -6,10 +6,10 @@ import {message} from 'antd';
 // https://braft.margox.cn/
 // 引入编辑器组件
 import BraftEditor, {EditorState} from 'braft-editor';
-import {debounce} from 'lodash';
 import {nanoid} from 'nanoid';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {isEmptyValue} from 'src/utils/util';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useAppSelector} from 'src/hooks/store';
+import {isEmptyValue, isNoteTrashGroup} from 'src/utils/util';
 
 interface Props {
   noteId?: string;
@@ -116,6 +116,14 @@ const RichEditor: React.FC<Props> = (props) => {
     onChange?.(value.toHTML());
   }, [onChange]);
 
+  const currentNoteGroupId = useAppSelector(
+    (state) => state.group.currentNoteGroupId
+  );
+
+  // 是否为废纸篓界面
+  const isTrash = useMemo(() => {
+    return isNoteTrashGroup(currentNoteGroupId);
+  }, [currentNoteGroupId]);
 
   return (
     <div className="rich-editor-container">
@@ -124,6 +132,7 @@ const RichEditor: React.FC<Props> = (props) => {
         onChange={handleEditorChange}
         onSave={submitContent}
         excludeControls={['media']}
+        readOnly={isTrash}
       />
     </div>
   );

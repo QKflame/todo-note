@@ -31,7 +31,6 @@ import {
   Tag,
   TreeSelect
 } from 'antd';
-import type {ColumnsType} from 'antd/es/table';
 import dayjs from 'dayjs';
 import {cloneDeep, debounce, orderBy, throttle} from 'lodash';
 import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
@@ -826,7 +825,7 @@ const TodoList = () => {
   useEffect(() => {
     const updateTableHeight = throttle(() => {
       const innerHeight = window.innerHeight;
-      const headerHeight = 60;
+      const headerHeight = isTrash ? 120 : 60;
       const pagePadding = 2 * 20;
       const toolbarHeight = 56;
       const tableHeaderHeight = 48;
@@ -836,7 +835,7 @@ const TodoList = () => {
           pagePadding -
           toolbarHeight -
           tableHeaderHeight -
-          10
+          10 - 20
       );
     }, 300);
 
@@ -858,11 +857,12 @@ const TodoList = () => {
           <div className="left-actions-wrapper">
             <Input
               size="middle"
-              placeholder="+ 输入待办任务，点击回车即可创建"
+              placeholder="+ 输入待办事项，点击回车即可创建"
               className="w-400 create-todo-input"
               onPressEnter={onCreateTodo}
               value={todoName}
               onChange={onTodoNameChange}
+              maxLength={255}
             />
           </div>
         )}
@@ -926,7 +926,7 @@ const TodoList = () => {
           size="middle"
           pagination={{
             // current: pageNo,
-            hideOnSinglePage: true,
+            // hideOnSinglePage: true,
             // pageSize,
             defaultPageSize: 20,
             showSizeChanger: true,

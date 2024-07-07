@@ -162,4 +162,8 @@ export async function recoverNote(
     const statement = db.prepare('update notes set groupId = ? where id = ?');
     return statement.run(-3, params.noteId);
   }
+
+  // 恢复到 -3 随手笔记分组中
+  const statement = db.prepare('update notes set groupId = ? where id = ?');
+  return statement.run(-3, params.noteId);
 }
