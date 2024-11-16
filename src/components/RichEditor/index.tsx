@@ -99,16 +99,18 @@ const RichEditor: React.FC<Props> = (props) => {
   }, [editorState, noteId, onSave, open, todoId]);
 
   useEffect(() => {
-    saveInterval.current = setInterval(() => {
-      if (isUpdated.current) {
-        submitContent(true);
-      }
-    }, 500);
+    if (!isEmptyValue(noteId)) {
+      saveInterval.current = setInterval(() => {
+        if (isUpdated.current) {
+          submitContent(true);
+        }
+      }, 500);
+    }
 
     return () => {
       clearInterval(saveInterval.current);
     };
-  }, [submitContent]);
+  }, [noteId, submitContent]);
 
   const handleEditorChange = useCallback((value) => {
     isUpdated.current = true;
